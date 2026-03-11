@@ -3,6 +3,7 @@ import asyncio
 import uvicorn
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from telethon import TelegramClient
+from fastapi import FastAPI
 
 from app.config import settings
 from app.llm import openai_provider as ai, get_llm, get_embeddings
@@ -21,6 +22,14 @@ from app.services.consumers import (
     profiler_consumer,
 )
 from app.utils.logging import setup_logging
+
+
+app = FastAPI()
+
+
+@app.get("/")
+def root():
+    return {"status": "ok"}
 
 
 async def run():

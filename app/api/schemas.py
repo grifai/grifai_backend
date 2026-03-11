@@ -1,4 +1,5 @@
-from typing import Any
+from typing import Any, Optional, Literal
+from datetime import datetime
 
 from pydantic import BaseModel
 
@@ -78,3 +79,30 @@ class HealthResponse(BaseModel):
 class WsEvent(BaseModel):
     type: str  # "new_message" | "draft" | "approved" | "skipped" | "error"
     payload: dict[str, Any] = {}
+
+
+# ── Consent ────────────────────────────────────────────────────────────────
+
+class UserConsentBase(BaseModel):
+    consent_type: Literal["memory", "calls", "voice"]
+
+
+class UserConsentCreate(UserConsentBase):
+    pass
+
+
+class UserConsentRevoke(UserConsentBase):
+    pass
+
+
+class UserConsentStatus(UserConsentBase):
+    granted_at: Optional[datetime]
+    revoked_at: Optional[datetime]
+
+
+class UserConsentInDB(UserConsentStatus):
+    id: int
+    user_id: int
+
+    class Config:
+        orm_mode = True

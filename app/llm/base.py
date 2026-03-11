@@ -1,27 +1,23 @@
 from abc import ABC, abstractmethod
+from typing import Any, AsyncGenerator, Optional
 
 
-class LLMProvider(ABC):
-
+class BaseLLM(ABC):
     @abstractmethod
-    def generate(
+    async def generate(
         self,
-        system_prompt: str,
-        user_message: str,
+        prompt: str,
+        stream: bool = False,
+        system_prompt: str = "",
+        user_message: str = "",
         temperature: float = 0.7,
         max_tokens: int = 1000,
         response_format: str = "text",
-    ) -> str:
-        """Генерация текста. response_format: 'text' или 'json'"""
+        **kwargs
+    ) -> Any:
+        """Генерация текста. Если stream=True — возвращает async-генератор."""
         pass
 
     @abstractmethod
-    def generate_with_history(
-        self,
-        system_prompt: str,
-        messages: list[dict],
-        temperature: float = 0.7,
-        max_tokens: int = 1000,
-    ) -> str:
-        """Генерация с историей [{role: "user"|"assistant", content: "..."}]"""
+    def count_tokens(self, prompt: str) -> int:
         pass
