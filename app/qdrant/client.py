@@ -8,6 +8,7 @@ VECTOR_SIZE = 384  # для all-MiniLM-L6-v2
 
 client = QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
 
+
 def create_collection():
     if COLLECTION not in [c.name for c in client.get_collections().collections]:
         client.create_collection(
@@ -17,6 +18,7 @@ def create_collection():
         print(f"Qdrant collection '{COLLECTION}' created.")
     else:
         print(f"Qdrant collection '{COLLECTION}' already exists.")
+
 
 if __name__ == "__main__":
     create_collection()

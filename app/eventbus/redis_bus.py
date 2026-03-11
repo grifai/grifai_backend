@@ -1,8 +1,8 @@
 import aioredis
-import asyncio
 from typing import Any, Dict, Callable
 
 REDIS_URL = "redis://redis:6379"
+
 
 class RedisEventBus:
     def __init__(self, redis_url: str = REDIS_URL):

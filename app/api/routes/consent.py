@@ -44,4 +44,3 @@ def delete_user_data(user_id: int, db: Session = Depends(get_db)):
     """
     result = delete_all_user_data(db, user_id, qdrant_url=settings.qdrant_url)
     return {"status": "deleted", "detail": result}
-

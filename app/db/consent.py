@@ -1,7 +1,8 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
-import datetime
-from .models import Base, User
+
+from .models import Base
+
 
 class UserConsent(Base):
     __tablename__ = "user_consents"

@@ -1,13 +1,14 @@
 import os
 import httpx
-import asyncio
 import time
+
 from .base import BaseLLM
-from typing import Any, AsyncGenerator
+from typing import Any
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_API_URL = os.getenv("OPENAI_API_URL", "https://api.openai.com/v1/chat/completions")
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4")
+
 
 class OpenAILLM(BaseLLM):
     def __init__(self):
