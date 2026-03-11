@@ -4,8 +4,8 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/setup-python@v5.4.0
         with:
           python-version: '3.11'
       - name: Install dependencies
@@ -13,7 +13,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install flake8 black isort mypy fastapi uvicorn
       - name: Run flake8
-        run: flake8 app/ --max-line-length=88
+        run: flake8 app/
       - name: Run black
         run: black --check app/
       - name: Run isort
