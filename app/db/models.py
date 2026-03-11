@@ -4,6 +4,7 @@ import datetime
 
 Base = declarative_base()
 
+
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True)
@@ -15,6 +16,7 @@ class User(Base):
     notes = relationship("Note", back_populates="user")
     tasks = relationship("Task", back_populates="user")
 
+
 class Agent(Base):
     __tablename__ = "agents"
     id = Column(Integer, primary_key=True)
@@ -23,6 +25,7 @@ class Agent(Base):
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     user = relationship("User", back_populates="agents")
     events = relationship("Event", back_populates="agent")
+
 
 class Event(Base):
     __tablename__ = "events"
@@ -34,6 +37,7 @@ class Event(Base):
     agent = relationship("Agent", back_populates="events")
     messages = relationship("Message", back_populates="event")
 
+
 class Message(Base):
     __tablename__ = "messages"
     id = Column(Integer, primary_key=True)
@@ -42,6 +46,7 @@ class Message(Base):
     content = Column(Text)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     event = relationship("Event", back_populates="messages")
+
 
 class Task(Base):
     __tablename__ = "tasks"
@@ -52,6 +57,7 @@ class Task(Base):
     status = Column(String)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     user = relationship("User", back_populates="tasks")
+
 
 class Note(Base):
     __tablename__ = "notes"

@@ -1,13 +1,14 @@
 import os
 import httpx
-import asyncio
 import time
+
 from .base import BaseLLM
-from typing import Any, AsyncGenerator
+from typing import Any
 
 CLAUDE_API_KEY = os.getenv("CLAUDE_API_KEY")
 CLAUDE_API_URL = os.getenv("CLAUDE_API_URL", "https://api.anthropic.com/v1/messages")
 CLAUDE_MODEL = os.getenv("CLAUDE_MODEL", "claude-3-opus-20240229")
+
 
 class ClaudeLLM(BaseLLM):
     def __init__(self):
