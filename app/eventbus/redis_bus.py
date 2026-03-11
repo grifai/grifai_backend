@@ -1,5 +1,6 @@
+from typing import Any, Callable, Dict
+
 import aioredis
-from typing import Any, Dict, Callable
 
 REDIS_URL = "redis://redis:6379"
 
@@ -15,14 +16,22 @@ class RedisEventBus:
     async def publish(self, stream: str, data: Dict[str, Any]):
         await self.redis.xadd(stream, data)
 
-    async def subscribe(self, stream: str, group: str, consumer: str, handler: Callable[[Dict[str, Any]], None]):
+    async def subscribe(
+        self,
+        stream: str,
+        group: str,
+        consumer: str,
+        handler: Callable[[Dict[str, Any]], None],
+    ):
         try:
             await self.redis.xgroup_create(stream, group, id="$", mkstream=True)
         except aioredis.exceptions.ResponseError as e:
             if "BUSYGROUP" not in str(e):
                 raise
         while True:
-            resp = await self.redis.xreadgroup(group, consumer, streams={stream: ">"}, count=10, block=1000)
+            resp = await self.redis.xreadgroup(
+                group, consumer, streams={stream: ">"}, count=10, block=1000
+            )
             for s, messages in resp:
                 for msg_id, msg in messages:
                     await handler(msg)
@@ -31,6 +40,7 @@ class RedisEventBus:
     async def close(self):
         if self.redis:
             await self.redis.close()
+
 
 # Пример использования:
 # bus = RedisEventBus()

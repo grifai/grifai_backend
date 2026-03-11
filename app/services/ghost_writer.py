@@ -1,13 +1,14 @@
 """Ghost-writing service — generates Telegram replies on behalf of the user."""
+
 import json
 from datetime import datetime
 
 from pydantic import BaseModel
 
 from app.llm.base import LLMProvider
-from app.llm.prompts import STYLE_PROFILE_PROMPT, REPLY_SYSTEM_PROMPT
-from app.memory.rag import VectorMemory, format_rag_context
+from app.llm.prompts import REPLY_SYSTEM_PROMPT, STYLE_PROFILE_PROMPT
 from app.memory.contacts import JarvisMemory
+from app.memory.rag import VectorMemory, format_rag_context
 
 
 class StyleProfile(BaseModel):
@@ -130,14 +131,19 @@ class GhostWriter:
 
         # b) Few-shot examples (up to 5 approved pairs)
         examples = self.store.get_contact_examples(contact_id, n=5)
-        examples_block = _format_examples(examples) if examples else "(нет примеров пока)"
+        examples_block = (
+            _format_examples(examples) if examples else "(нет примеров пока)"
+        )
 
         # c) RAG: search relevant history
         query = " ".join(incoming_messages)
         rag_results = self.vm.search(
             query, k=6, min_score=0.35, contact_filter=contact_name
         )
-        rag_context = format_rag_context(rag_results, max_chars=600) or "(нет релевантной истории)"
+        rag_context = (
+            format_rag_context(rag_results, max_chars=600)
+            or "(нет релевантной истории)"
+        )
 
         # d) Build prompt
         system = REPLY_SYSTEM_PROMPT.format(
@@ -173,6 +179,7 @@ class GhostWriter:
 
 
 # ── Formatting helpers ─────────────────────────────────────────────────────────
+
 
 def _format_style_profile(p: StyleProfile) -> str:
     if not p.msg_length and not p.address:

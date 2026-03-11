@@ -4,11 +4,11 @@ from datetime import datetime, timezone
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import ask, contacts, health, summary, consent
+from app.api.routes import ask, consent, contacts, health, summary
 from app.config import settings
 
-
 # ── WebSocket connection manager ───────────────────────────────────────────────
+
 
 class ConnectionManager:
     """Broadcasts JSON events to all connected WebSocket clients."""
@@ -42,6 +42,7 @@ class ConnectionManager:
 
 # ── Lifespan ───────────────────────────────────────────────────────────────────
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # ── Startup ────────────────────────────────────────────────────────────────
@@ -50,8 +51,8 @@ async def lifespan(app: FastAPI):
 
     # Reuse VectorMemory already initialized by main.py's rag.init(),
     # or initialize standalone if running the API without the full bot.
+    from app.llm import get_embeddings, get_llm
     from app.memory import rag
-    from app.llm import get_llm, get_embeddings
 
     try:
         app.state.vector_memory = rag._get()
@@ -71,11 +72,13 @@ async def lifespan(app: FastAPI):
         app.state.telegram_connected = False
     if not hasattr(app.state, "memory"):
         from app.memory.contacts import JarvisMemory
+
         app.state.memory = JarvisMemory(settings.memory_file)
 
     # TTS — always available (OpenAI key is required, ElevenLabs is optional)
     if not hasattr(app.state, "tts"):
         from app.services.tts import TTSService
+
         app.state.tts = TTSService(
             elevenlabs_key=settings.elevenlabs_key,
             openai_key=settings.openai_key,
@@ -101,14 +104,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(ask.router,      prefix="/api/v1", tags=["search"])
+app.include_router(ask.router, prefix="/api/v1", tags=["search"])
 app.include_router(contacts.router, prefix="/api/v1", tags=["contacts"])
-app.include_router(summary.router,  prefix="/api/v1", tags=["digest"])
-app.include_router(health.router,   prefix="/api/v1", tags=["system"])
-app.include_router(consent.router,  prefix="/api/v1", tags=["consent"])
+app.include_router(summary.router, prefix="/api/v1", tags=["digest"])
+app.include_router(health.router, prefix="/api/v1", tags=["system"])
+app.include_router(consent.router, prefix="/api/v1", tags=["consent"])
 
 
 # ── WebSocket ──────────────────────────────────────────────────────────────────
+
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
@@ -125,6 +129,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
 
 # ── Backward-compat factory used by old main.py ────────────────────────────────
+
 
 def create_app() -> FastAPI:
     """Kept for backward compatibility. Returns the module-level app."""

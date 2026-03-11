@@ -12,6 +12,7 @@ Flow:
 
   profile_updates → profiler_consumer → rebuild contact profile
 """
+
 import asyncio
 from datetime import datetime
 
@@ -19,18 +20,20 @@ from telethon import TelegramClient
 
 from app.llm import openai_provider as ai
 from app.memory.contacts import JarvisMemory
-from app.services.event_bus import EventBus, STREAMS
+from app.services.event_bus import STREAMS, EventBus
 from app.services.ghost_writer import GhostWriter
-
 
 # ── Helpers (imported lazily to avoid circular imports) ───────────────────────
 
+
 def _bot_utils():
-    from app.bot.client import fetch_messages, format_dialog, ask_approval
+    from app.bot.client import ask_approval, fetch_messages, format_dialog
+
     return fetch_messages, format_dialog, ask_approval
 
 
 # ── Consumer 1: Ghost Writer ───────────────────────────────────────────────────
+
 
 async def ghost_writer_consumer(
     bus: EventBus,
@@ -58,7 +61,9 @@ async def ghost_writer_consumer(
         # Build relationship profile on first encounter
         if not memory.get_contact(contact_id):
             print(f"  [gw] Building profile for {contact_name}...")
-            full_msgs, my_c, their_c = await fetch_messages(client, chat_id, scan_messages)
+            full_msgs, my_c, their_c = await fetch_messages(
+                client, chat_id, scan_messages
+            )
             if my_c >= 3 and their_c >= 3:
                 try:
                     profile = ai.analyze_contact(format_dialog(full_msgs))
@@ -67,18 +72,24 @@ async def ghost_writer_consumer(
                     print(f"  [gw] Profile error: {exc}")
 
         draft = ghost_writer.generate_reply(contact_id, texts, chat_context)
-        print(f"  [gw] Draft for {contact_name} (conf={draft.confidence:.0%}): {draft.text[:60]!r}")
+        print(
+            f"  [gw] Draft for {contact_name} (conf={draft.confidence:.0%}): {draft.text[:60]!r}"
+        )
 
-        await bus.publish(STREAMS["DRAFTS"], "draft_ready", {
-            "contact_id": contact_id,
-            "contact_name": contact_name,
-            "draft_text": draft.text,
-            "confidence": draft.confidence,
-            "incoming_texts": texts,
-            "chat_context": chat_context,
-            "chat_id": str(chat_id),
-            "timestamp": datetime.now().isoformat(),
-        })
+        await bus.publish(
+            STREAMS["DRAFTS"],
+            "draft_ready",
+            {
+                "contact_id": contact_id,
+                "contact_name": contact_name,
+                "draft_text": draft.text,
+                "confidence": draft.confidence,
+                "incoming_texts": texts,
+                "chat_context": chat_context,
+                "chat_id": str(chat_id),
+                "timestamp": datetime.now().isoformat(),
+            },
+        )
 
     await bus.subscribe(
         STREAMS["INCOMING"], "ghost_writer_group", "gw1", handle, batch_size=5
@@ -86,6 +97,7 @@ async def ghost_writer_consumer(
 
 
 # ── Consumer 2: Approval UI ────────────────────────────────────────────────────
+
 
 async def approval_ui_consumer(
     bus: EventBus,
@@ -113,10 +125,14 @@ async def approval_ui_consumer(
         def run_approval() -> tuple[str, str | None, str]:
             current = initial_draft
             while True:
-                action, final = ask_approval(contact_name, contact_id, texts, current, memory)
+                action, final = ask_approval(
+                    contact_name, contact_id, texts, current, memory
+                )
                 if action == "redo":
                     print("Regenerating...")
-                    current = ghost_writer.generate_reply(contact_id, texts, chat_context).text
+                    current = ghost_writer.generate_reply(
+                        contact_id, texts, chat_context
+                    ).text
                     continue
                 return action, final, current
 
@@ -125,13 +141,19 @@ async def approval_ui_consumer(
         if action in ("approved", "revised") and final:
             await client.send_message(chat_id, final)
             print(f"Sent: {final!r}")
-            memory.add_example(contact_name, " | ".join(texts), used_draft, action, final)
-            await bus.publish(STREAMS["APPROVED"], "reply_sent", {
-                "contact_id": contact_id,
-                "incoming_text": " | ".join(texts),
-                "reply_text": final,
-                "timestamp": datetime.now().isoformat(),
-            })
+            memory.add_example(
+                contact_name, " | ".join(texts), used_draft, action, final
+            )
+            await bus.publish(
+                STREAMS["APPROVED"],
+                "reply_sent",
+                {
+                    "contact_id": contact_id,
+                    "incoming_text": " | ".join(texts),
+                    "reply_text": final,
+                    "timestamp": datetime.now().isoformat(),
+                },
+            )
         else:
             print("Skipped")
             memory.add_example(contact_name, " | ".join(texts), used_draft, "skipped")
@@ -143,6 +165,7 @@ async def approval_ui_consumer(
 
 
 # ── Consumer 3: Learner ────────────────────────────────────────────────────────
+
 
 async def learner_consumer(
     bus: EventBus,
@@ -161,6 +184,7 @@ async def learner_consumer(
 
 
 # ── Consumer 4: Profiler ───────────────────────────────────────────────────────
+
 
 async def profiler_consumer(
     bus: EventBus,

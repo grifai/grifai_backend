@@ -17,8 +17,8 @@ from datetime import datetime, timedelta
 from openai import OpenAI
 
 from app.config import settings
-from app.memory import rag
 from app.llm.prompts import SEARCH_ANSWER_PROMPT
+from app.memory import rag
 
 # ── GPT-парсер намерения ───────────────────────────────────────────────────────
 
@@ -88,6 +88,7 @@ def parse_query(query: str) -> dict:
 
 # ── Answer generation ──────────────────────────────────────────────────────────
 
+
 def format_search_results_for_llm(results: list[dict]) -> str:
     lines = []
     for r in results:
@@ -108,7 +109,9 @@ def answer_search(query: str, results: list[dict]) -> str:
     if not context:
         context = format_search_results_for_llm([{**r, "score": 1.0} for r in results])
     client = OpenAI(api_key=settings.openai_key)
-    user_msg = f"Результаты поиска по переписке:\n\n{context}\n\nВопрос пользователя: {query}"
+    user_msg = (
+        f"Результаты поиска по переписке:\n\n{context}\n\nВопрос пользователя: {query}"
+    )
     resp = client.chat.completions.create(
         model=settings.model,
         max_tokens=400,
@@ -123,10 +126,13 @@ def answer_search(query: str, results: list[dict]) -> str:
 
 # ── Executors ─────────────────────────────────────────────────────────────────
 
+
 def run_count(params: dict):
     term = params.get("search_term") or ""
     if not term:
-        print("Не удалось извлечь слово для подсчёта. Попробуй: 'Сколько раз я написал «привет» Лизе?'")
+        print(
+            "Не удалось извлечь слово для подсчёта. Попробуй: 'Сколько раз я написал «привет» Лизе?'"
+        )
         return
 
     contact = params.get("contact") or ""
@@ -143,7 +149,7 @@ def run_count(params: dict):
 
     date_str = f"  за {date_from} — {date_to}" if date_from else ""
     mine_str = " (только мои)" if only_mine else ""
-    print(f'Считаю точные вхождения: «{term}»{mine_str}{date_str}\n')
+    print(f"Считаю точные вхождения: «{term}»{mine_str}{date_str}\n")
 
     total, matches = rag.count_and_find(term, contact, only_mine, date_from, date_to)
 
@@ -151,11 +157,17 @@ def run_count(params: dict):
         all_c = rag.get_contact_messages(contact)
         if all_c:
             dates = [m["date"][:10] for m in all_c]
-            print(f'«{term}» не найдено.')
-            print(f'Индекс для {contact or "всех"}: {min(dates)} — {max(dates)}, {len(all_c)} сообщений.')
-            print(f'Нужная переписка может быть старше. Переиндексируй: python scripts/index.py --force')
+            print(f"«{term}» не найдено.")
+            print(
+                f'Индекс для {contact or "всех"}: {min(dates)} — {max(dates)}, {len(all_c)} сообщений.'
+            )
+            print(
+                f"Нужная переписка может быть старше. Переиндексируй: python scripts/index.py --force"
+            )
         else:
-            print(f'«{term}» не найдено и нет сообщений для контакта «{contact}» в индексе.')
+            print(
+                f"«{term}» не найдено и нет сообщений для контакта «{contact}» в индексе."
+            )
         return
 
     by_who: dict[str, int] = {}
@@ -183,7 +195,9 @@ def run_count(params: dict):
         text = m["text"]
         idx = text.lower().find(term.lower())
         start = max(0, idx - 35)
-        snippet = ("…" if start > 0 else "") + text[start:idx + len(term) + 60].strip()
+        snippet = ("…" if start > 0 else "") + text[
+            start : idx + len(term) + 60
+        ].strip()
         print(f"[{date}] {who}: {snippet}")
     if total > 10:
         print(f"  … и ещё {total - 10}")
@@ -207,13 +221,19 @@ def run_analyze(params: dict):
     msgs = rag.get_contact_messages(contact, only_mine, date_from, date_to)
 
     if not msgs:
-        period = f" за {date_from}" + (f"–{date_to}" if date_to != date_from else "") if date_from else ""
+        period = (
+            f" за {date_from}" + (f"–{date_to}" if date_to != date_from else "")
+            if date_from
+            else ""
+        )
         print(f"Нет сообщений{period} {'с ' + contact if contact else ''}.")
         return
 
     dates = [m["date"][:10] for m in msgs]
     mine_c = sum(1 for m in msgs if m["mine"])
-    print(f"Анализирую {len(msgs)} сообщений [{min(dates)} — {max(dates)}]  моих: {mine_c}, их: {len(msgs)-mine_c}")
+    print(
+        f"Анализирую {len(msgs)} сообщений [{min(dates)} — {max(dates)}]  моих: {mine_c}, их: {len(msgs)-mine_c}"
+    )
 
     answer = rag.answer(question, msgs)
 
@@ -251,9 +271,13 @@ def run_search(params: dict):
     k = 12 if contact else 20
 
     results = rag.search(
-        question, k=k, only_mine=only_mine,
-        contact_filter=contact, min_score=0.3,
-        date_from=date_from, date_to=date_to,
+        question,
+        k=k,
+        only_mine=only_mine,
+        contact_filter=contact,
+        min_score=0.3,
+        date_from=date_from,
+        date_to=date_to,
     )
 
     if len(results) < 3:
@@ -262,7 +286,9 @@ def run_search(params: dict):
             words = [w for w in question.split() if len(w) > 4]
             keywords = " ".join(words[:3])
         if keywords:
-            _, text_matches = rag.count_and_find(keywords, contact, only_mine, date_from, date_to)
+            _, text_matches = rag.count_and_find(
+                keywords, contact, only_mine, date_from, date_to
+            )
             existing = {(r["text"], r["date"]) for r in results}
             for m in text_matches[:10]:
                 if (m["text"], m["date"]) not in existing:
@@ -300,6 +326,7 @@ def run_search(params: dict):
 
 # ── Routing ───────────────────────────────────────────────────────────────────
 
+
 def route(params: dict) -> str:
     intent = params.get("intent", "search")
     contact = params.get("contact") or ""
@@ -311,6 +338,7 @@ def route(params: dict) -> str:
 
 
 # ── CLI entry point ───────────────────────────────────────────────────────────
+
 
 def main():
     args = sys.argv[1:]

@@ -1,13 +1,13 @@
 import json
 import logging
 
-from sqlalchemy.orm import Session
 from qdrant_client import QdrantClient
-from qdrant_client.models import Filter, FieldCondition, MatchValue
+from qdrant_client.models import FieldCondition, Filter, MatchValue
+from sqlalchemy.orm import Session
 
-from app.db.models import Agent, Event, Message, Task, Note
-from app.db.consent import UserConsent
 from app.db.audit import log_action
+from app.db.consent import UserConsent
+from app.db.models import Agent, Event, Message, Note, Task
 
 logger = logging.getLogger(__name__)
 

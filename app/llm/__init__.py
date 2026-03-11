@@ -1,15 +1,24 @@
 from .base import LLMProvider
-from .openai_provider import OpenAIProvider
 from .claude_provider import ClaudeProvider
 from .embeddings import EmbeddingProvider
+from .openai_provider import OpenAIProvider
 
-__all__ = ["LLMProvider", "OpenAIProvider", "ClaudeProvider", "EmbeddingProvider", "get_llm", "get_embeddings"]
+__all__ = [
+    "LLMProvider",
+    "OpenAIProvider",
+    "ClaudeProvider",
+    "EmbeddingProvider",
+    "get_llm",
+    "get_embeddings",
+]
 
 _llm_cache: dict[str, LLMProvider] = {}
 _embeddings_cache: EmbeddingProvider | None = None
 
 
-def get_llm(provider: str = "openai", api_key: str = "", model: str = "") -> LLMProvider:
+def get_llm(
+    provider: str = "openai", api_key: str = "", model: str = ""
+) -> LLMProvider:
     """Получить LLM-провайдер. Кеширует инстанс."""
     if provider in _llm_cache:
         return _llm_cache[provider]
@@ -40,7 +49,9 @@ def get_embeddings(api_key: str = "", model: str = "") -> EmbeddingProvider:
 
 def _get_env(name: str, default: str = "") -> str:
     import os
+
     from dotenv import load_dotenv
+
     load_dotenv()
     val = os.getenv(name, default)
     if not val:

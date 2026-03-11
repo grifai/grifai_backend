@@ -1,6 +1,7 @@
-from sqlalchemy import Column, Integer, String, DateTime, Text
-from sqlalchemy.orm import Session
 from datetime import datetime
+
+from sqlalchemy import Column, DateTime, Integer, String, Text
+from sqlalchemy.orm import Session
 
 from app.db.models import Base
 
@@ -12,8 +13,10 @@ class AuditLog(Base):
 
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, nullable=False, index=True)
-    action = Column(String, nullable=False)  # "grant_consent" | "revoke_consent" | "delete_data"
-    detail = Column(Text, nullable=True)     # JSON-строка с деталями (consent_type и т.д.)
+    action = Column(
+        String, nullable=False
+    )  # "grant_consent" | "revoke_consent" | "delete_data"
+    detail = Column(Text, nullable=True)  # JSON-строка с деталями (consent_type и т.д.)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
 

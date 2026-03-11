@@ -1,11 +1,12 @@
 """Text-to-speech service — ElevenLabs primary, OpenAI fallback."""
+
 import re
 from pathlib import Path
 
 import httpx
 
-
 # ── Text chunking helper ───────────────────────────────────────────────────────
+
 
 def _chunk_text(text: str, max_chars: int) -> list[str]:
     """Split text at sentence/paragraph boundaries to stay under max_chars."""
@@ -33,6 +34,7 @@ def _chunk_text(text: str, max_chars: int) -> list[str]:
 
 
 # ── TTSService ────────────────────────────────────────────────────────────────
+
 
 class TTSService:
     """

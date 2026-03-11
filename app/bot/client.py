@@ -7,8 +7,8 @@ from telethon import TelegramClient, events
 from app.llm import openai_provider as ai
 from app.memory import rag
 from app.memory.contacts import JarvisMemory
+from app.services.event_bus import STREAMS, EventBus
 from app.services.ghost_writer import GhostWriter
-from app.services.event_bus import EventBus, STREAMS
 
 
 def format_dialog(msgs: list[dict]) -> str:
@@ -44,6 +44,7 @@ async def fetch_messages(
 
 # ── Approval UI ───────────────────────────────────────────────────────────────
 
+
 def ask_approval(
     sender: str,
     contact_id: str,
@@ -66,7 +67,9 @@ def ask_approval(
     while True:
         mode = memory.get_contact_ai_mode(contact_id)
         ai_label = "AI:ON " if mode == "auto" else "AI:OFF"
-        print(f"  1 Send   2 Edit   3 Regen   4 Skip   5 Profile   6 [{ai_label}] Toggle")
+        print(
+            f"  1 Send   2 Edit   3 Regen   4 Skip   5 Profile   6 [{ai_label}] Toggle"
+        )
 
         ch = input("-> ").strip()
         if ch == "1":
@@ -87,12 +90,15 @@ def ask_approval(
             new_mode = "never" if mode == "auto" else "auto"
             memory.set_contact_ai_mode(contact_id, new_mode)
             status = "ВЫКЛЮЧЕН" if new_mode == "never" else "ВКЛЮЧЁН"
-            print(f"  AI {status} для {sender}. Следующие сообщения от него {'будут игнорироваться' if new_mode == 'never' else 'снова обрабатываться'}.")
+            print(
+                f"  AI {status} для {sender}. Следующие сообщения от него {'будут игнорироваться' if new_mode == 'never' else 'снова обрабатываться'}."
+            )
         else:
             print("  Enter 1-6")
 
 
 # ── Message batching ──────────────────────────────────────────────────────────
+
 
 class JarvisBot:
     def __init__(
@@ -155,11 +161,19 @@ class JarvisBot:
             all_my_msgs.extend(m["text"] for m in msgs if m["mine"])
 
             dialog_text = format_dialog(msgs)
-            print(f"  [{personal_found}/{self.scan_contacts}] analyzing {name}...", end=" ", flush=True)
+            print(
+                f"  [{personal_found}/{self.scan_contacts}] analyzing {name}...",
+                end=" ",
+                flush=True,
+            )
             try:
                 profile = ai.analyze_contact(dialog_text, self.model)
                 self.memory.set_contact(contact_id, name, profile)
-                rel = profile.get("relationship", "?")[:50] if isinstance(profile, dict) else "?"
+                rel = (
+                    profile.get("relationship", "?")[:50]
+                    if isinstance(profile, dict)
+                    else "?"
+                )
                 print(f"ok ({rel})")
             except Exception as e:
                 print(f"error: {e}")
@@ -191,22 +205,24 @@ class JarvisBot:
 
         # ── Event-driven path (Redis Streams) ──────────────────────────────────
         if self.event_bus:
-            await self.event_bus.publish(STREAMS["INCOMING"], "batch_received", {
-                "contact_id": contact_id,
-                "contact_name": sender,
-                "texts": texts,
-                "chat_id": str(chat_id),
-                "timestamp": datetime.now().isoformat(),
-            })
+            await self.event_bus.publish(
+                STREAMS["INCOMING"],
+                "batch_received",
+                {
+                    "contact_id": contact_id,
+                    "contact_name": sender,
+                    "texts": texts,
+                    "chat_id": str(chat_id),
+                    "timestamp": datetime.now().isoformat(),
+                },
+            )
             print(f"  → queued to incoming_messages")
             return
 
         # ── Inline fallback (no Redis) ─────────────────────────────────────────
-        msgs, _, _ = await fetch_messages(
-            self.client, chat_id, self.context_window + n
-        )
+        msgs, _, _ = await fetch_messages(self.client, chat_id, self.context_window + n)
         context_msgs = msgs[:-n] if n < len(msgs) else []
-        chat_context = format_dialog(context_msgs[-self.context_window:])
+        chat_context = format_dialog(context_msgs[-self.context_window :])
 
         if not self.memory.get_contact(contact_id):
             print(f"  Building profile for {sender}...")
@@ -222,7 +238,9 @@ class JarvisBot:
                     print(f"  Profile error: {e}")
 
         if self.ghost_writer:
-            reply_draft = self.ghost_writer.generate_reply(contact_id, texts, chat_context)
+            reply_draft = self.ghost_writer.generate_reply(
+                contact_id, texts, chat_context
+            )
             draft = reply_draft.text
             print(f"  GhostWriter confidence: {reply_draft.confidence:.0%}")
         else:
@@ -231,7 +249,12 @@ class JarvisBot:
             if rag_context:
                 print(f"  RAG: {len(rag_results)} relevant messages found")
             draft = ai.generate_reply(
-                sender, contact_id, texts, chat_context, self.memory, self.model,
+                sender,
+                contact_id,
+                texts,
+                chat_context,
+                self.memory,
+                self.model,
                 rag_context=rag_context,
             )
 
@@ -240,7 +263,9 @@ class JarvisBot:
             if action == "redo":
                 print("Regenerating...")
                 if self.ghost_writer:
-                    draft = self.ghost_writer.generate_reply(contact_id, texts, chat_context).text
+                    draft = self.ghost_writer.generate_reply(
+                        contact_id, texts, chat_context
+                    ).text
                 else:
                     draft = ai.generate_reply(
                         sender, contact_id, texts, chat_context, self.memory, self.model
@@ -251,7 +276,9 @@ class JarvisBot:
                 print(f"Sent: {final!r}")
                 self.memory.add_example(sender, " | ".join(texts), draft, action, final)
                 if self.ghost_writer:
-                    self.ghost_writer.learn_from_approval(contact_id, " | ".join(texts), final)
+                    self.ghost_writer.learn_from_approval(
+                        contact_id, " | ".join(texts), final
+                    )
             else:
                 print("Skipped")
                 self.memory.add_example(sender, " | ".join(texts), draft, "skipped")
@@ -289,9 +316,8 @@ class JarvisBot:
             if self.memory.get_contact_ai_mode(str(event.chat_id)) == "never":
                 return
             sender = await event.get_sender()
-            name = (
-                f"{sender.first_name or ''} {sender.last_name or ''}".strip()
-                or str(sender.id)
+            name = f"{sender.first_name or ''} {sender.last_name or ''}".strip() or str(
+                sender.id
             )
             await self._buffer_message(
                 event.chat_id, name, str(event.chat_id), event.raw_text, event

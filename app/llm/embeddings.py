@@ -25,7 +25,11 @@ class EmbeddingProvider:
             resp = self.client.embeddings.create(model=self.model, input=chunk)
             vecs = [e.embedding for e in resp.data]
             all_vecs.extend(vecs)
-            print(f"  {min(i + batch_size, len(truncated))}/{len(truncated)}", end="\r", flush=True)
+            print(
+                f"  {min(i + batch_size, len(truncated))}/{len(truncated)}",
+                end="\r",
+                flush=True,
+            )
         print()
         matrix = np.array(all_vecs, dtype=np.float32)
         return self.normalize(matrix)

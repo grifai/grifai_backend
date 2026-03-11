@@ -1,4 +1,5 @@
 """Redis Streams event bus for inter-component communication."""
+
 import asyncio
 import json
 from typing import Awaitable, Callable
@@ -8,11 +9,11 @@ import redis.asyncio as aioredis
 # ── Stream names ───────────────────────────────────────────────────────────────
 
 STREAMS = {
-    "INCOMING": "incoming_messages",    # new batched message from a contact
-    "DRAFTS": "reply_drafts",           # generated reply draft
-    "APPROVED": "approved_replies",     # user-approved reply that was sent
+    "INCOMING": "incoming_messages",  # new batched message from a contact
+    "DRAFTS": "reply_drafts",  # generated reply draft
+    "APPROVED": "approved_replies",  # user-approved reply that was sent
     "PROFILE_UPDATES": "profile_updates",  # request to rebuild a contact profile
-    "NOTIFICATIONS": "notifications",   # UI/WebSocket notifications
+    "NOTIFICATIONS": "notifications",  # UI/WebSocket notifications
 }
 
 # Callback signature: (event_type, data, msg_id) -> None
@@ -20,6 +21,7 @@ ConsumerCallback = Callable[[str, dict, str], Awaitable[None]]
 
 
 # ── EventBus ──────────────────────────────────────────────────────────────────
+
 
 class EventBus:
     """Thin async wrapper around Redis Streams."""

@@ -12,13 +12,19 @@ from pathlib import Path
 
 from qdrant_client import QdrantClient
 from qdrant_client.models import (
-    Distance, VectorParams, PointStruct,
-    Filter, FieldCondition, MatchValue, MatchAny, Range,
+    Distance,
+    FieldCondition,
+    Filter,
+    MatchAny,
+    MatchValue,
     PayloadSchemaType,
+    PointStruct,
+    Range,
+    VectorParams,
 )
 
 from app.llm.embeddings import EmbeddingProvider
-from app.llm.prompts import SEARCH_ANSWER_PROMPT, ANALYZE_ANSWER_PROMPT
+from app.llm.prompts import ANALYZE_ANSWER_PROMPT, SEARCH_ANSWER_PROMPT
 
 # Legacy path — kept for scripts/migrate_rag.py
 RAG_FILE = Path("data/jarvis_rag.pkl")
@@ -28,6 +34,7 @@ COLLECTION = "jarvis_messages"
 
 
 # ── Contact matching helper ────────────────────────────────────────────────────
+
 
 def _contact_matches(contact_name: str, f: str) -> bool:
     """Fuzzy match: 'Лиза' не матчит 'Елизавета'."""
@@ -45,6 +52,7 @@ def _contact_matches(contact_name: str, f: str) -> bool:
 
 
 # ── VectorMemory class ────────────────────────────────────────────────────────
+
 
 class VectorMemory:
     def __init__(self, qdrant_url: str, collection_name: str = COLLECTION):
@@ -69,8 +77,8 @@ class VectorMemory:
         )
         for field, schema in [
             ("contact_name", PayloadSchemaType.KEYWORD),
-            ("mine",         PayloadSchemaType.BOOL),
-            ("date",         PayloadSchemaType.KEYWORD),
+            ("mine", PayloadSchemaType.BOOL),
+            ("date", PayloadSchemaType.KEYWORD),
         ]:
             self.client.create_payload_index(
                 collection_name=self.collection_name,
@@ -104,7 +112,11 @@ class VectorMemory:
         """Return exact contact names that fuzzy-match contact_filter."""
         if self._contact_names_cache is None:
             self._contact_names_cache = self._fetch_all_contact_names()
-        return [cn for cn in self._contact_names_cache if _contact_matches(cn, contact_filter)]
+        return [
+            cn
+            for cn in self._contact_names_cache
+            if _contact_matches(cn, contact_filter)
+        ]
 
     def _invalidate_cache(self) -> None:
         self._contact_names_cache = None
@@ -196,7 +208,11 @@ class VectorMemory:
                 for j in range(len(chunk_docs))
             ]
             self.client.upsert(collection_name=self.collection_name, points=points)
-            print(f"  {min(i + batch_size, len(docs))}/{len(docs)} загружено", end="\r", flush=True)
+            print(
+                f"  {min(i + batch_size, len(docs))}/{len(docs)} загружено",
+                end="\r",
+                flush=True,
+            )
         print()
 
     def build_index(self, docs: list[dict]) -> None:
@@ -339,6 +355,7 @@ class VectorMemory:
 
 # ── Formatting helpers ─────────────────────────────────────────────────────────
 
+
 def format_rag_context(results: list[dict], max_chars: int = 800) -> str:
     if not results:
         return ""
@@ -371,8 +388,8 @@ _vm: VectorMemory | None = None
 
 def init(api_key: str = "", qdrant_url: str = "") -> None:
     global _vm
-    from app.llm import get_llm, get_embeddings
     from app.config import settings
+    from app.llm import get_embeddings, get_llm
 
     url = qdrant_url or settings.qdrant_url
     _vm = VectorMemory(qdrant_url=url)
@@ -413,8 +430,13 @@ def search(
     if _vm is None:
         return []
     return _vm.search(
-        query, k=k, only_mine=only_mine, contact_filter=contact_filter,
-        min_score=min_score, date_from=date_from, date_to=date_to,
+        query,
+        k=k,
+        only_mine=only_mine,
+        contact_filter=contact_filter,
+        min_score=min_score,
+        date_from=date_from,
+        date_to=date_to,
     )
 
 
@@ -425,7 +447,9 @@ def count_and_find(
     date_from: str | None = None,
     date_to: str | None = None,
 ) -> tuple[int, list[dict]]:
-    return _get().count_and_find(substring, contact_filter, only_mine, date_from, date_to)
+    return _get().count_and_find(
+        substring, contact_filter, only_mine, date_from, date_to
+    )
 
 
 def get_contact_messages(
@@ -435,7 +459,9 @@ def get_contact_messages(
     date_to: str | None = None,
     max_messages: int = 2000,
 ) -> list[dict]:
-    return _get().get_contact_messages(contact_filter, only_mine, date_from, date_to, max_messages)
+    return _get().get_contact_messages(
+        contact_filter, only_mine, date_from, date_to, max_messages
+    )
 
 
 def list_matching_contacts(contact_filter: str) -> list[str]:

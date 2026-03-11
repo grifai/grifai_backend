@@ -1,5 +1,5 @@
-import os
 import getpass
+import os
 from pathlib import Path
 
 from dotenv import load_dotenv, set_key
@@ -29,9 +29,9 @@ def _require(key: str, prompt: str, secret: bool = False) -> str:
 
 
 # Prompt for required credentials before Settings validates them
-_require("TG_API_ID",   "Telegram API ID")
+_require("TG_API_ID", "Telegram API ID")
 _require("TG_API_HASH", "Telegram API Hash", secret=True)
-_require("OPENAI_KEY",  "OpenAI API Key",    secret=True)
+_require("OPENAI_KEY", "OpenAI API Key", secret=True)
 
 
 class Settings(BaseSettings):
