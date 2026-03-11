@@ -1,9 +1,10 @@
 import os
-import httpx
 import time
+from typing import Any
+
+import httpx
 
 from .base import BaseLLM
-from typing import Any
 
 CLAUDE_API_KEY = os.getenv("CLAUDE_API_KEY")
 CLAUDE_API_URL = os.getenv("CLAUDE_API_URL", "https://api.anthropic.com/v1/messages")
@@ -20,13 +21,13 @@ class ClaudeLLM(BaseLLM):
         headers = {
             "x-api-key": self.api_key,
             "anthropic-version": "2023-06-01",
-            "content-type": "application/json"
+            "content-type": "application/json",
         }
         payload = {
             "model": self.model,
             "max_tokens": kwargs.get("max_tokens", 1024),
             "messages": [{"role": "user", "content": prompt}],
-            "stream": stream
+            "stream": stream,
         }
         start = time.monotonic()
         async with httpx.AsyncClient(timeout=60) as client:
@@ -36,8 +37,12 @@ class ClaudeLLM(BaseLLM):
                 data = resp.json()
                 latency = time.monotonic() - start
                 # Логирование latency и token count
-                print(f"[ClaudeLLM] latency={latency:.2f}s tokens={data.get('usage', {}).get('output_tokens', 0)}")
-                return data["content"] if not stream else data  # stream поддержка — доработать под SSE
+                print(
+                    f"[ClaudeLLM] latency={latency:.2f}s tokens={data.get('usage', {}).get('output_tokens', 0)}"
+                )
+                return (
+                    data["content"] if not stream else data
+                )  # stream поддержка — доработать под SSE
             except httpx.HTTPStatusError as e:
                 if e.response.status_code == 429:
                     raise RuntimeError("rate_limit")

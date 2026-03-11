@@ -1,10 +1,10 @@
-from typing import Any, Optional, Literal
 from datetime import datetime
+from typing import Any, Literal, Optional
 
 from pydantic import BaseModel
 
-
 # ── Ask ───────────────────────────────────────────────────────────────────────
+
 
 class AskRequest(BaseModel):
     query: str
@@ -26,6 +26,7 @@ class AskResponse(BaseModel):
 
 
 # ── Contacts ──────────────────────────────────────────────────────────────────
+
 
 class ContactResponse(BaseModel):
     contact_id: str
@@ -56,6 +57,7 @@ class ContactMessagesResponse(BaseModel):
 
 # ── Summary ───────────────────────────────────────────────────────────────────
 
+
 class SummaryResponse(BaseModel):
     summary: str
     dialogs_count: int
@@ -65,10 +67,11 @@ class SummaryResponse(BaseModel):
 
 # ── Health ────────────────────────────────────────────────────────────────────
 
+
 class HealthResponse(BaseModel):
     status: str
-    telegram: str        # "connected" | "disconnected"
-    qdrant: str          # "ok" | "error"
+    telegram: str  # "connected" | "disconnected"
+    qdrant: str  # "ok" | "error"
     uptime_seconds: int
     active_contacts: int
     indexed_messages: int
@@ -76,12 +79,14 @@ class HealthResponse(BaseModel):
 
 # ── WebSocket ─────────────────────────────────────────────────────────────────
 
+
 class WsEvent(BaseModel):
     type: str  # "new_message" | "draft" | "approved" | "skipped" | "error"
     payload: dict[str, Any] = {}
 
 
 # ── Consent ────────────────────────────────────────────────────────────────
+
 
 class UserConsentBase(BaseModel):
     consent_type: Literal["memory", "calls", "voice"]

@@ -15,7 +15,9 @@ class JarvisMemory:
         if path.exists():
             self.data = json.loads(path.read_text(encoding="utf-8"))
             n = len(self.data.get("contacts", {}))
-            print(f"Loaded: {n} contact profiles, {len(self.data.get('examples', []))} examples")
+            print(
+                f"Loaded: {n} contact profiles, {len(self.data.get('examples', []))} examples"
+            )
         else:
             print("Memory empty — will build profiles on startup scan")
 
@@ -101,7 +103,8 @@ class JarvisMemory:
         contact_exs: list[dict] = []
         if sender:
             contact_exs = [
-                e for e in exs
+                e
+                for e in exs
                 if e["sender"] == sender and e["action"] in approved_actions
             ][-10:]
 
@@ -130,11 +133,13 @@ class JarvisMemory:
         if c is None:
             return
         examples = c.setdefault("examples", [])
-        examples.append({
-            "ts": datetime.now().isoformat(),
-            "incoming": incoming,
-            "reply": reply,
-        })
+        examples.append(
+            {
+                "ts": datetime.now().isoformat(),
+                "incoming": incoming,
+                "reply": reply,
+            }
+        )
         if len(examples) > 20:
             c["examples"] = examples[-20:]
         self.save()

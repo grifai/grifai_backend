@@ -1,12 +1,17 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
 from typing import List
 
-from app.api.schemas import UserConsentCreate, UserConsentRevoke, UserConsentInDB
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+
 from app.api.dependencies import get_db
-from app.services.consent import get_all_consents, grant_user_consent, revoke_user_consent
-from app.services.user_data import delete_all_user_data
+from app.api.schemas import UserConsentCreate, UserConsentInDB, UserConsentRevoke
 from app.config import settings
+from app.services.consent import (
+    get_all_consents,
+    grant_user_consent,
+    revoke_user_consent,
+)
+from app.services.user_data import delete_all_user_data
 
 router = APIRouter(tags=["consent"])
 
@@ -27,11 +32,15 @@ def grant_consent(user_id: int, data: UserConsentCreate, db: Session = Depends(g
 
 # ── DELETE /user/{user_id}/consent ─────────────────────────────────────────────
 @router.delete("/user/{user_id}/consent", response_model=UserConsentInDB)
-def revoke_consent(user_id: int, data: UserConsentRevoke, db: Session = Depends(get_db)):
+def revoke_consent(
+    user_id: int, data: UserConsentRevoke, db: Session = Depends(get_db)
+):
     """Отозвать согласие — данные этого типа будут помечены к удалению."""
     consent = revoke_user_consent(db, user_id, data.consent_type)
     if not consent:
-        raise HTTPException(status_code=404, detail="Consent not found or already revoked")
+        raise HTTPException(
+            status_code=404, detail="Consent not found or already revoked"
+        )
     return consent
 
 

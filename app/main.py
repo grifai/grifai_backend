@@ -2,27 +2,27 @@ import asyncio
 
 import uvicorn
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from telethon import TelegramClient
 from fastapi import FastAPI
+from telethon import TelegramClient
 
+from app.api.server import app
+from app.bot.client import JarvisBot
 from app.config import settings
-from app.llm import openai_provider as ai, get_llm, get_embeddings
+from app.llm import get_embeddings, get_llm
+from app.llm import openai_provider as ai
 from app.memory import rag
 from app.memory.contacts import JarvisMemory
-from app.bot.client import JarvisBot
-from app.api.server import app
+from app.services.consumers import (
+    approval_ui_consumer,
+    ghost_writer_consumer,
+    learner_consumer,
+    profiler_consumer,
+)
 from app.services.digest import DigestService
 from app.services.event_bus import EventBus
 from app.services.ghost_writer import GhostWriter
 from app.services.tts import TTSService
-from app.services.consumers import (
-    ghost_writer_consumer,
-    approval_ui_consumer,
-    learner_consumer,
-    profiler_consumer,
-)
 from app.utils.logging import setup_logging
-
 
 app = FastAPI()
 
@@ -39,12 +39,18 @@ async def run():
     rag.init(settings.openai_key)
     memory = JarvisMemory(settings.memory_file)
 
-    client = TelegramClient(settings.session_file, settings.tg_api_id, settings.tg_api_hash)
+    client = TelegramClient(
+        settings.session_file, settings.tg_api_id, settings.tg_api_hash
+    )
     await client.start()
     me = await client.get_me()
 
     rag_size = rag.index_size()
-    rag_status = f"{rag_size} сообщений" if rag_size else "нет (запусти: python scripts/index.py)"
+    rag_status = (
+        f"{rag_size} сообщений"
+        if rag_size
+        else "нет (запусти: python scripts/index.py)"
+    )
 
     # ── Services ───────────────────────────────────────────────────────────────
     tts = TTSService(
@@ -94,7 +100,11 @@ async def run():
     # Share state with FastAPI before server starts
     app.state.memory = memory
     app.state.telegram_connected = True
-    app.state.telegram_account = {"name": me.first_name, "username": me.username, "id": me.id}
+    app.state.telegram_account = {
+        "name": me.first_name,
+        "username": me.username,
+        "id": me.id,
+    }
     app.state.tts = tts
 
     # ── Scheduled digests ──────────────────────────────────────────────────────
@@ -103,12 +113,16 @@ async def run():
     async def morning_digest():
         print("\n[scheduler] Running morning digest...")
         result = await digest_service.generate_and_speak(hours=12, client=client)
-        print(f"[scheduler] Morning digest: {result.dialogs_count} dialogs, audio={result.audio_path}")
+        print(
+            f"[scheduler] Morning digest: {result.dialogs_count} dialogs, audio={result.audio_path}"
+        )
 
     async def evening_digest():
         print("\n[scheduler] Running evening digest...")
         result = await digest_service.generate_and_speak(hours=24, client=client)
-        print(f"[scheduler] Evening digest: {result.dialogs_count} dialogs, audio={result.audio_path}")
+        print(
+            f"[scheduler] Evening digest: {result.dialogs_count} dialogs, audio={result.audio_path}"
+        )
 
     scheduler.add_job(morning_digest, "cron", hour=7, minute=0)
     scheduler.add_job(evening_digest, "cron", hour=22, minute=0)
@@ -129,13 +143,18 @@ async def run():
             client.run_until_disconnected(),
             server.serve(),
             ghost_writer_consumer(
-                bus, ghost_writer, client, memory,
+                bus,
+                ghost_writer,
+                client,
+                memory,
                 context_window=settings.context_window,
                 scan_messages=settings.scan_messages,
             ),
             approval_ui_consumer(bus, ghost_writer, client, memory),
             learner_consumer(bus, ghost_writer),
-            profiler_consumer(bus, client, memory, scan_messages=settings.scan_messages),
+            profiler_consumer(
+                bus, client, memory, scan_messages=settings.scan_messages
+            ),
         )
     finally:
         scheduler.shutdown(wait=False)

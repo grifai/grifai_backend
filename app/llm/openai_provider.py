@@ -67,6 +67,7 @@ def init_openai(api_key: str, model: str = "gpt-4o-mini"):
 def init(api_key: str = "", model: str = ""):
     """Alias for init_openai. Pulls keys from .env if not provided."""
     from app.llm import get_llm
+
     global _provider
     instance = get_llm(api_key=api_key, model=model) if api_key else get_llm()
     # get_llm may return any LLMProvider; store as-is
@@ -80,6 +81,7 @@ def _get() -> OpenAIProvider:
 
 
 # ── Public AI helpers ──────────────────────────────────────────────────────────
+
 
 def analyze_contact(dialog_text: str, model: str = "") -> dict:
     """Deep contact analysis via LLM -> JSON profile."""
@@ -151,7 +153,9 @@ def generate_reply(
             system += f"\n\n### Analysis of {sender}:\n{p['raw_analysis'][:500]}"
 
     if rag_context:
-        system += f"\n\n### Похожие прошлые сообщения (контекст из истории):\n{rag_context}"
+        system += (
+            f"\n\n### Похожие прошлые сообщения (контекст из истории):\n{rag_context}"
+        )
 
     examples = memory.get_decision_examples(sender)
     if examples:

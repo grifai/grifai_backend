@@ -14,7 +14,11 @@ async def health(request: Request):
     started_at = getattr(request.app.state, "started_at", datetime.now(timezone.utc))
     uptime = int((datetime.now(timezone.utc) - started_at).total_seconds())
 
-    tg_status = "connected" if getattr(request.app.state, "telegram_connected", False) else "disconnected"
+    tg_status = (
+        "connected"
+        if getattr(request.app.state, "telegram_connected", False)
+        else "disconnected"
+    )
 
     vm: VectorMemory | None = getattr(request.app.state, "vector_memory", None)
     try:

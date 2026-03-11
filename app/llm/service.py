@@ -1,9 +1,9 @@
 import asyncio
 import random
+from typing import Any
 
 from .claude import ClaudeLLM
 from .openai import OpenAILLM
-from typing import Any
 
 
 class LLMService:
@@ -11,7 +11,9 @@ class LLMService:
         self.claude = ClaudeLLM()
         self.openai = OpenAILLM()
 
-    async def generate(self, prompt: str, stream: bool = False, max_retries: int = 3, **kwargs) -> Any:
+    async def generate(
+        self, prompt: str, stream: bool = False, max_retries: int = 3, **kwargs
+    ) -> Any:
         backoff = 1
         for attempt in range(max_retries):
             try:
