@@ -16,6 +16,18 @@ def _oai() -> OpenAI:
     return _client
 
 
+def _call(system: str, user: str, model: str, max_tokens: int) -> str:
+    resp = _oai().chat.completions.create(
+        model=model,
+        max_tokens=max_tokens,
+        messages=[
+            {"role": "system", "content": system},
+            {"role": "user", "content": user},
+        ],
+    )
+    return resp.choices[0].message.content.strip()
+
+
 # ── Prompts ───────────────────────────────────────────────────────────────────
 
 _ANALYSIS_PROMPT = """You are a chat analyzer. You are given a conversation from a messenger.
@@ -76,15 +88,7 @@ KEY RULES:
 
 def analyze_contact(dialog_text: str, model: str) -> dict:
     """Deep contact analysis via LLM -> JSON profile."""
-    resp = _oai().chat.completions.create(
-        model=model,
-        max_tokens=800,
-        messages=[
-            {"role": "system", "content": _ANALYSIS_PROMPT},
-            {"role": "user", "content": f"Conversation:\n\n{dialog_text}"},
-        ],
-    )
-    raw = resp.choices[0].message.content.strip()
+    raw = _call(_ANALYSIS_PROMPT, f"Conversation:\n\n{dialog_text}", model, 800)
     if raw.startswith("```"):
         raw = raw.split("\n", 1)[-1].rsplit("```", 1)[0]
     try:
@@ -97,15 +101,7 @@ def analyze_my_style(all_my_msgs: list[str], model: str) -> str:
     """Analyze overall user style from messages across all chats."""
     sample = all_my_msgs[-80:]
     block = "\n".join(f"- {m[:200]}" for m in sample)
-    resp = _oai().chat.completions.create(
-        model=model,
-        max_tokens=400,
-        messages=[
-            {"role": "system", "content": _MY_STYLE_PROMPT},
-            {"role": "user", "content": f"My messages from various chats:\n{block}"},
-        ],
-    )
-    return resp.choices[0].message.content.strip()
+    return _call(_MY_STYLE_PROMPT, f"My messages from various chats:\n{block}", model, 400)
 
 
 def generate_reply(
@@ -119,12 +115,10 @@ def generate_reply(
 ) -> str:
     system = _REPLY_SYSTEM
 
-    # General style
     my_profile = memory.get_my_profile()
     if my_profile:
         system += f"\n### My general messaging style:\n{my_profile}"
 
-    # Per-contact profile
     contact = memory.get_contact(contact_id)
     if contact and contact.get("profile"):
         p = contact["profile"]
@@ -150,16 +144,13 @@ def generate_reply(
         elif isinstance(p, dict) and p.get("raw_analysis"):
             system += f"\n\n### Analysis of {sender}:\n{p['raw_analysis'][:500]}"
 
-    # RAG: relevant past messages
     if rag_context:
         system += f"\n\n### Похожие прошлые сообщения (контекст из истории):\n{rag_context}"
 
-    # Past decisions
     examples = memory.get_decision_examples(sender)
     if examples:
         system += f"\n{examples}"
 
-    # User message
     if len(incoming_batch) == 1:
         incoming_text = incoming_batch[0]
     else:
@@ -172,12 +163,4 @@ def generate_reply(
         user_msg += f"\nRecent conversation:\n{chat_context}\n---\n"
     user_msg += f"\nIncoming:\n{incoming_text}\n\nMy reply:"
 
-    resp = _oai().chat.completions.create(
-        model=model,
-        max_tokens=400,
-        messages=[
-            {"role": "system", "content": system},
-            {"role": "user", "content": user_msg},
-        ],
-    )
-    return resp.choices[0].message.content.strip()
+    return _call(system, user_msg, model, 400)

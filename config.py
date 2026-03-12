@@ -25,7 +25,7 @@ API_ID   = int(_require("TG_API_ID",   "Telegram API ID"))
 API_HASH = _require("TG_API_HASH",     "Telegram API Hash", secret=True)
 
 # OpenAI
-OPENAI_KEY = _require("OPENAI_KEY",    "OpenAI API Key",    secret=True)
+OPENAI_KEY = _require("OPENAI_KEY", "OpenAI API Key", secret=True)
 
 # Paths
 SESSION_FILE = os.getenv("SESSION_FILE", "jarvis_session")
@@ -38,4 +38,4 @@ BATCH_WAIT_SEC  = int(os.getenv("BATCH_WAIT_SEC",  "5"))
 SCAN_CONTACTS   = int(os.getenv("SCAN_CONTACTS",   "50"))
 SCAN_MESSAGES   = int(os.getenv("SCAN_MESSAGES",   "150"))
 CONTEXT_WINDOW  = int(os.getenv("CONTEXT_WINDOW",  "40"))
-MODEL           = os.getenv("MODEL", "gpt-4o-mini")
+MODEL           = os.getenv("MODEL", "claude-haiku-4-5-20251001")
