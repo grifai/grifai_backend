@@ -1,0 +1,18 @@
+{
+  "id": "negotiation_coach",
+  "name": "Negotiation Coach",
+  "task_types": ["coach"],
+  "domains": ["negotiation", "sales", "business", "hr"],
+  "description": "Prepares user for negotiations: counterparty research, briefing, real-time prompts.",
+  "template": "negotiation_coach",
+  "default_tools": ["web_search"],
+  "default_model": "claude-sonnet-4-6",
+  "typical_complexity": "simple",
+  "plan_pattern": "pipeline",
+  "typical_agents": [
+    {"role": "researcher", "order": 1},
+    {"role": "coach", "order": 2}
+  ],
+  "required_fields": ["event", "counterparty"],
+  "optional_fields": ["user_goal", "their_goal", "batna", "deadline"]
+}

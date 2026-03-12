@@ -1,0 +1,31 @@
+fastapi==0.115.6
+uvicorn[standard]==0.32.1
+websockets==14.1
+
+# Pydantic
+pydantic==2.10.3
+pydantic-settings==2.7.0
+
+# Database
+sqlalchemy[asyncio]==2.0.36
+asyncpg==0.30.0
+psycopg2-binary==2.9.10
+pgvector==0.3.6
+numpy==2.4.3
+
+# Redis / Celery
+redis==5.2.1
+celery==5.4.0
+kombu==5.4.2
+
+# LLM (needed at runtime by llm.gateway)
+litellm==1.56.4
+openai==1.58.1
+anthropic>=0.41.0,<1.0.0
+langchain-core==0.3.28
+
+# Utilities
+python-dotenv==1.0.1
+structlog==24.4.0
+tenacity==9.0.0
+python-multipart==0.0.20

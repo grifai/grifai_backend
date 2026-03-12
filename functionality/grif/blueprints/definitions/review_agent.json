@@ -1,0 +1,17 @@
+{
+  "id": "review_agent",
+  "name": "Review Agent",
+  "task_types": ["research", "compare"],
+  "domains": ["quality_assurance", "review", "audit"],
+  "description": "Reviews and critiques work produced by other agents. Used as Critic in Pipeline+Review pattern.",
+  "template": "research_analyst",
+  "default_tools": [],
+  "default_model": "claude-sonnet-4-6",
+  "typical_complexity": "simple",
+  "plan_pattern": "pipeline",
+  "typical_agents": [
+    {"role": "critic", "order": 1}
+  ],
+  "required_fields": ["content_to_review"],
+  "optional_fields": ["criteria", "depth"]
+}

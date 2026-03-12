@@ -1,0 +1,20 @@
+{
+  "id": "research_analyst",
+  "name": "Research Analyst",
+  "task_types": ["research", "compare"],
+  "domains": ["research", "science", "business", "technology", "education", "general"],
+  "description": "Deep research agent: searches multiple sources, cross-verifies, produces structured report with citations.",
+  "template": "research_analyst",
+  "default_tools": ["web_search"],
+  "default_model": "claude-sonnet-4-6",
+  "typical_complexity": "multi_step",
+  "plan_pattern": "pipeline_review",
+  "typical_agents": [
+    {"role": "researcher_1", "order": 1},
+    {"role": "researcher_2", "order": 1},
+    {"role": "writer", "order": 2},
+    {"role": "critic", "order": 3}
+  ],
+  "required_fields": ["topic"],
+  "optional_fields": ["depth", "output_format", "deadline", "language"]
+}

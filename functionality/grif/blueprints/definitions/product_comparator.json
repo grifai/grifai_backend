@@ -1,0 +1,19 @@
+{
+  "id": "product_comparator",
+  "name": "Product Comparator",
+  "task_types": ["compare"],
+  "domains": ["ecommerce", "technology", "consumer_goods", "services"],
+  "description": "Compares products/services side by side with scoring and recommendation.",
+  "template": "product_comparator",
+  "default_tools": ["web_search"],
+  "default_model": "claude-sonnet-4-6",
+  "typical_complexity": "multi_step",
+  "plan_pattern": "parallel_merge",
+  "typical_agents": [
+    {"role": "researcher_a", "order": 1},
+    {"role": "researcher_b", "order": 1},
+    {"role": "comparator", "order": 2}
+  ],
+  "required_fields": ["items"],
+  "optional_fields": ["criteria", "budget", "use_case"]
+}

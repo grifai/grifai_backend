@@ -1,0 +1,17 @@
+{
+  "id": "content_writer",
+  "name": "Content Writer",
+  "task_types": ["generate", "operate"],
+  "domains": ["content", "blog", "social_media", "email", "marketing"],
+  "description": "Creates publication-ready content: posts, articles, emails, reports.",
+  "template": "content_writer",
+  "default_tools": ["web_search"],
+  "default_model": "claude-sonnet-4-6",
+  "typical_complexity": "simple",
+  "plan_pattern": "pipeline",
+  "typical_agents": [
+    {"role": "writer", "order": 1}
+  ],
+  "required_fields": ["content_type", "topic"],
+  "optional_fields": ["audience", "tone", "length", "channel", "style_examples"]
+}

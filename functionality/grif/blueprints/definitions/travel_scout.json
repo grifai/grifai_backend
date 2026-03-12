@@ -1,0 +1,17 @@
+{
+  "id": "travel_scout",
+  "name": "Travel Scout",
+  "task_types": ["search"],
+  "domains": ["travel", "hotels", "flights", "tourism"],
+  "description": "Finds best travel options matching exact constraints: budget, dates, must-haves.",
+  "template": "travel_scout",
+  "default_tools": ["web_search"],
+  "default_model": "claude-haiku-4-5-20251001",
+  "typical_complexity": "simple",
+  "plan_pattern": "pipeline",
+  "typical_agents": [
+    {"role": "scout", "order": 1}
+  ],
+  "required_fields": ["destination"],
+  "optional_fields": ["checkin", "checkout", "budget", "guests", "must_haves"]
+}

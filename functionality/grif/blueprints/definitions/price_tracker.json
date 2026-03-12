@@ -1,0 +1,17 @@
+{
+  "id": "price_tracker",
+  "name": "Price Tracker",
+  "task_types": ["monitor"],
+  "domains": ["ecommerce", "finance", "travel", "crypto"],
+  "description": "Monitors a price or metric and alerts when a condition is met.",
+  "template": "price_tracker",
+  "default_tools": ["web_search"],
+  "default_model": "claude-haiku-4-5-20251001",
+  "typical_complexity": "simple",
+  "plan_pattern": "pipeline",
+  "typical_agents": [
+    {"role": "tracker", "order": 1}
+  ],
+  "required_fields": ["item", "condition", "threshold"],
+  "optional_fields": ["check_interval", "alert_channel", "currency"]
+}

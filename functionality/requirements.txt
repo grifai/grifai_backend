@@ -1,0 +1,54 @@
+# Web framework
+fastapi==0.115.6
+uvicorn[standard]==0.32.1
+websockets==14.1
+
+# Pydantic
+pydantic==2.10.3
+pydantic-settings==2.7.0
+
+# Database
+sqlalchemy[asyncio]==2.0.36
+asyncpg==0.30.0
+psycopg2-binary==2.9.10
+alembic==1.14.0
+pgvector==0.3.6
+
+# Redis / Celery
+redis==5.2.1
+celery==5.4.0
+kombu==5.4.2
+
+# LLM
+litellm==1.56.4
+anthropic>=0.41.0,<1.0.0
+openai==1.58.1
+
+# LangGraph / LangChain
+langgraph==0.2.59
+langchain-core==0.3.28
+langchain-anthropic==0.3.3
+
+# HTTP client
+httpx>=0.23.0,<0.28.0
+aiohttp==3.11.11
+
+# Utilities
+python-dotenv==1.0.1
+tenacity==9.0.0
+structlog==24.4.0
+python-multipart==0.0.20
+
+# Testing
+pytest==8.3.4
+pytest-asyncio==0.25.0
+pytest-mock==3.14.0
+httpx>=0.23.0,<0.28.0
+anyio==4.8.0
+
+# Type checking
+mypy==1.13.0
+types-redis==4.6.0.20241004
+
+# Search tools
+tavily-python==0.5.0
