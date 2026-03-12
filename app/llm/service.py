@@ -11,9 +11,7 @@ class LLMService:
         self.claude = ClaudeLLM()
         self.openai = OpenAILLM()
 
-    async def generate(
-        self, prompt: str, stream: bool = False, max_retries: int = 3, **kwargs
-    ) -> Any:
+    async def generate(self, prompt: str, stream: bool = False, max_retries: int = 3, **kwargs) -> Any:
         backoff = 1
         for attempt in range(max_retries):
             try:

@@ -153,9 +153,7 @@ def generate_reply(
             system += f"\n\n### Analysis of {sender}:\n{p['raw_analysis'][:500]}"
 
     if rag_context:
-        system += (
-            f"\n\n### Похожие прошлые сообщения (контекст из истории):\n{rag_context}"
-        )
+        system += f"\n\n### Похожие прошлые сообщения (контекст из истории):\n{rag_context}"
 
     examples = memory.get_decision_examples(sender)
     if examples:
@@ -164,9 +162,7 @@ def generate_reply(
     if len(incoming_batch) == 1:
         incoming_text = incoming_batch[0]
     else:
-        incoming_text = "Batch of messages:\n" + "\n".join(
-            f"  -> {m}" for m in incoming_batch
-        )
+        incoming_text = "Batch of messages:\n" + "\n".join(f"  -> {m}" for m in incoming_batch)
 
     user_msg = f"Contact: {sender}\n"
     if chat_context:

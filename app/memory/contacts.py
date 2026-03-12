@@ -15,16 +15,12 @@ class JarvisMemory:
         if path.exists():
             self.data = json.loads(path.read_text(encoding="utf-8"))
             n = len(self.data.get("contacts", {}))
-            print(
-                f"Loaded: {n} contact profiles, {len(self.data.get('examples', []))} examples"
-            )
+            print(f"Loaded: {n} contact profiles, {len(self.data.get('examples', []))} examples")
         else:
             print("Memory empty — will build profiles on startup scan")
 
     def save(self):
-        self.path.write_text(
-            json.dumps(self.data, ensure_ascii=False, indent=2), encoding="utf-8"
-        )
+        self.path.write_text(json.dumps(self.data, ensure_ascii=False, indent=2), encoding="utf-8")
 
     # ── Contacts ──────────────────────────────────────────────────────────────
 
@@ -102,11 +98,7 @@ class JarvisMemory:
 
         contact_exs: list[dict] = []
         if sender:
-            contact_exs = [
-                e
-                for e in exs
-                if e["sender"] == sender and e["action"] in approved_actions
-            ][-10:]
+            contact_exs = [e for e in exs if e["sender"] == sender and e["action"] in approved_actions][-10:]
 
         general_exs = [e for e in exs if e["action"] in approved_actions][-10:]
 
@@ -120,9 +112,7 @@ class JarvisMemory:
         for e in relevant:
             reply = e.get("final_reply") or e["llm_draft"]
             tag = f" [{e['sender']}]" if e.get("sender") else ""
-            lines.append(
-                f'- Incoming{tag}: "{e["incoming"][:100]}" -> I replied: "{reply[:150]}"'
-            )
+            lines.append(f'- Incoming{tag}: "{e["incoming"][:100]}" -> I replied: "{reply[:150]}"')
         return "\n".join(lines)
 
     # ── Per-contact examples (for GhostWriter few-shot learning) ─────────────

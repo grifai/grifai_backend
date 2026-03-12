@@ -1,0 +1,11 @@
+{
+    "yaml.schemas": {
+        "file:///Users/tstukalin/.vscode/extensions/continue.continue-1.2.16-darwin-arm64/config-yaml-schema.json": [
+            ".continue/**/*.yaml"
+        ],
+        "file:///Users/tstukalin/.vscode/extensions/continue.continue-1.3.32-darwin-arm64/config-yaml-schema.json": [
+            ".continue/**/*.yaml",
+            "file:///Users/tstukalin/.continue/config.yaml"
+        ]
+    }
+}

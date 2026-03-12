@@ -7,9 +7,7 @@ import httpx
 from .base import BaseLLM
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-OPENAI_API_URL = os.getenv(
-    "OPENAI_API_URL", "https://api.openai.com/v1/chat/completions"
-)
+OPENAI_API_URL = os.getenv("OPENAI_API_URL", "https://api.openai.com/v1/chat/completions")
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4")
 
 
@@ -37,12 +35,8 @@ class OpenAILLM(BaseLLM):
                 resp.raise_for_status()
                 data = resp.json()
                 latency = time.monotonic() - start
-                print(
-                    f"[OpenAILLM] latency={latency:.2f}s tokens={data.get('usage', {}).get('total_tokens', 0)}"
-                )
-                return (
-                    data["choices"][0]["message"]["content"] if not stream else data
-                )  # stream поддержка — доработать
+                print(f"[OpenAILLM] latency={latency:.2f}s tokens={data.get('usage', {}).get('total_tokens', 0)}")
+                return data["choices"][0]["message"]["content"] if not stream else data  # stream поддержка — доработать
             except httpx.HTTPStatusError as e:
                 if e.response.status_code == 429:
                     raise RuntimeError("rate_limit")

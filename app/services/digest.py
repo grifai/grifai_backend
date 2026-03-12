@@ -46,9 +46,7 @@ class DigestService:
 
     def generate_digest(self, hours: int = 24) -> DigestResult:
         """Build a digest from RAG-indexed messages for the past `hours`."""
-        date_from = (datetime.now() - timedelta(hours=hours)).strftime(
-            "%Y-%m-%dT%H:%M:%S"
-        )
+        date_from = (datetime.now() - timedelta(hours=hours)).strftime("%Y-%m-%dT%H:%M:%S")
         msgs = self.vm.get_contact_messages(date_from=date_from, max_messages=3000)
 
         if not msgs:
@@ -133,9 +131,7 @@ async def run(hours: int = 24):
     """Standalone CLI runner (python -m app.services.digest or scripts/)."""
     llm = get_llm(api_key=settings.openai_key, model=settings.model)
 
-    client = TelegramClient(
-        settings.session_file, settings.tg_api_id, settings.tg_api_hash
-    )
+    client = TelegramClient(settings.session_file, settings.tg_api_id, settings.tg_api_hash)
     await client.start()
     me = await client.get_me()
     my_id = me.id

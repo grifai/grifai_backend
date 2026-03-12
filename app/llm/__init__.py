@@ -16,9 +16,7 @@ _llm_cache: dict[str, LLMProvider] = {}
 _embeddings_cache: EmbeddingProvider | None = None
 
 
-def get_llm(
-    provider: str = "openai", api_key: str = "", model: str = ""
-) -> LLMProvider:
+def get_llm(provider: str = "openai", api_key: str = "", model: str = "") -> LLMProvider:
     """Получить LLM-провайдер. Кеширует инстанс."""
     if provider in _llm_cache:
         return _llm_cache[provider]

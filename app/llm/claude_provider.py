@@ -34,9 +34,7 @@ class ClaudeProvider(LLMProvider):
         )
         return resp.content[0].text
 
-    def generate_with_history(
-        self, system_prompt, messages, temperature=0.7, max_tokens=1000
-    ):
+    def generate_with_history(self, system_prompt, messages, temperature=0.7, max_tokens=1000):
         resp = self.client.messages.create(
             model=self.model,
             max_tokens=max_tokens,

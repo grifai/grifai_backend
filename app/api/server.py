@@ -62,9 +62,7 @@ async def lifespan(app: FastAPI):
         app.state.vector_memory = rag._get()
 
     app.state.llm = get_llm(api_key=settings.openai_key, model=settings.model)
-    app.state.embeddings = get_embeddings(
-        api_key=settings.openai_key, model=settings.embedding_model
-    )
+    app.state.embeddings = get_embeddings(api_key=settings.openai_key, model=settings.embedding_model)
 
     # telegram_connected / memory are set by main.py before server starts.
     # Provide safe defaults so health endpoint works even without the bot.

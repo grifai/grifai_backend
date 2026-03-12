@@ -19,9 +19,7 @@ def format_dialog(msgs: list[dict]) -> str:
     return "\n".join(lines)
 
 
-async def fetch_messages(
-    client: TelegramClient, chat_id: int, limit: int
-) -> tuple[list[dict], int, int]:
+async def fetch_messages(client: TelegramClient, chat_id: int, limit: int) -> tuple[list[dict], int, int]:
     me = await client.get_me()
     my_id = me.id
     msgs: list[dict] = []
@@ -67,9 +65,7 @@ def ask_approval(
     while True:
         mode = memory.get_contact_ai_mode(contact_id)
         ai_label = "AI:ON " if mode == "auto" else "AI:OFF"
-        print(
-            f"  1 Send   2 Edit   3 Regen   4 Skip   5 Profile   6 [{ai_label}] Toggle"
-        )
+        print(f"  1 Send   2 Edit   3 Regen   4 Skip   5 Profile   6 [{ai_label}] Toggle")
 
         ch = input("-> ").strip()
         if ch == "1":
@@ -149,9 +145,7 @@ class JarvisBot:
                 scanned += 1
                 continue
 
-            msgs, my_count, their_count = await fetch_messages(
-                self.client, dialog.id, self.scan_messages
-            )
+            msgs, my_count, their_count = await fetch_messages(self.client, dialog.id, self.scan_messages)
 
             if my_count < 3 or their_count < 3:
                 print(f"  skip {name} — too few messages ({my_count}+{their_count})")
@@ -169,11 +163,7 @@ class JarvisBot:
             try:
                 profile = ai.analyze_contact(dialog_text, self.model)
                 self.memory.set_contact(contact_id, name, profile)
-                rel = (
-                    profile.get("relationship", "?")[:50]
-                    if isinstance(profile, dict)
-                    else "?"
-                )
+                rel = profile.get("relationship", "?")[:50] if isinstance(profile, dict) else "?"
                 print(f"ok ({rel})")
             except Exception as e:
                 print(f"error: {e}")
@@ -226,9 +216,7 @@ class JarvisBot:
 
         if not self.memory.get_contact(contact_id):
             print(f"  Building profile for {sender}...")
-            full_msgs, my_c, their_c = await fetch_messages(
-                self.client, chat_id, self.scan_messages
-            )
+            full_msgs, my_c, their_c = await fetch_messages(self.client, chat_id, self.scan_messages)
             if my_c >= 3 and their_c >= 3:
                 try:
                     profile = ai.analyze_contact(format_dialog(full_msgs), self.model)
@@ -238,9 +226,7 @@ class JarvisBot:
                     print(f"  Profile error: {e}")
 
         if self.ghost_writer:
-            reply_draft = self.ghost_writer.generate_reply(
-                contact_id, texts, chat_context
-            )
+            reply_draft = self.ghost_writer.generate_reply(contact_id, texts, chat_context)
             draft = reply_draft.text
             print(f"  GhostWriter confidence: {reply_draft.confidence:.0%}")
         else:
@@ -263,30 +249,22 @@ class JarvisBot:
             if action == "redo":
                 print("Regenerating...")
                 if self.ghost_writer:
-                    draft = self.ghost_writer.generate_reply(
-                        contact_id, texts, chat_context
-                    ).text
+                    draft = self.ghost_writer.generate_reply(contact_id, texts, chat_context).text
                 else:
-                    draft = ai.generate_reply(
-                        sender, contact_id, texts, chat_context, self.memory, self.model
-                    )
+                    draft = ai.generate_reply(sender, contact_id, texts, chat_context, self.memory, self.model)
                 continue
             if action in ("approved", "revised") and final:
                 await last_event.reply(final)
                 print(f"Sent: {final!r}")
                 self.memory.add_example(sender, " | ".join(texts), draft, action, final)
                 if self.ghost_writer:
-                    self.ghost_writer.learn_from_approval(
-                        contact_id, " | ".join(texts), final
-                    )
+                    self.ghost_writer.learn_from_approval(contact_id, " | ".join(texts), final)
             else:
                 print("Skipped")
                 self.memory.add_example(sender, " | ".join(texts), draft, "skipped")
             break
 
-    async def _buffer_message(
-        self, chat_id: int, sender: str, contact_id: str, text: str, event
-    ):
+    async def _buffer_message(self, chat_id: int, sender: str, contact_id: str, text: str, event):
         if chat_id not in self._buffers:
             self._buffers[chat_id] = {
                 "sender": sender,
@@ -316,9 +294,5 @@ class JarvisBot:
             if self.memory.get_contact_ai_mode(str(event.chat_id)) == "never":
                 return
             sender = await event.get_sender()
-            name = f"{sender.first_name or ''} {sender.last_name or ''}".strip() or str(
-                sender.id
-            )
-            await self._buffer_message(
-                event.chat_id, name, str(event.chat_id), event.raw_text, event
-            )
+            name = f"{sender.first_name or ''} {sender.last_name or ''}".strip() or str(sender.id)
+            await self._buffer_message(event.chat_id, name, str(event.chat_id), event.raw_text, event)

@@ -39,18 +39,12 @@ async def run():
     rag.init(settings.openai_key)
     memory = JarvisMemory(settings.memory_file)
 
-    client = TelegramClient(
-        settings.session_file, settings.tg_api_id, settings.tg_api_hash
-    )
+    client = TelegramClient(settings.session_file, settings.tg_api_id, settings.tg_api_hash)
     await client.start()
     me = await client.get_me()
 
     rag_size = rag.index_size()
-    rag_status = (
-        f"{rag_size} сообщений"
-        if rag_size
-        else "нет (запусти: python scripts/index.py)"
-    )
+    rag_status = f"{rag_size} сообщений" if rag_size else "нет (запусти: python scripts/index.py)"
 
     # ── Services ───────────────────────────────────────────────────────────────
     tts = TTSService(
@@ -113,16 +107,12 @@ async def run():
     async def morning_digest():
         print("\n[scheduler] Running morning digest...")
         result = await digest_service.generate_and_speak(hours=12, client=client)
-        print(
-            f"[scheduler] Morning digest: {result.dialogs_count} dialogs, audio={result.audio_path}"
-        )
+        print(f"[scheduler] Morning digest: {result.dialogs_count} dialogs, audio={result.audio_path}")
 
     async def evening_digest():
         print("\n[scheduler] Running evening digest...")
         result = await digest_service.generate_and_speak(hours=24, client=client)
-        print(
-            f"[scheduler] Evening digest: {result.dialogs_count} dialogs, audio={result.audio_path}"
-        )
+        print(f"[scheduler] Evening digest: {result.dialogs_count} dialogs, audio={result.audio_path}")
 
     scheduler.add_job(morning_digest, "cron", hour=7, minute=0)
     scheduler.add_job(evening_digest, "cron", hour=22, minute=0)
@@ -152,9 +142,7 @@ async def run():
             ),
             approval_ui_consumer(bus, ghost_writer, client, memory),
             learner_consumer(bus, ghost_writer),
-            profiler_consumer(
-                bus, client, memory, scan_messages=settings.scan_messages
-            ),
+            profiler_consumer(bus, client, memory, scan_messages=settings.scan_messages),
         )
     finally:
         scheduler.shutdown(wait=False)

@@ -80,11 +80,6 @@ class HealthResponse(BaseModel):
 # ── WebSocket ─────────────────────────────────────────────────────────────────
 
 
-class WsEvent(BaseModel):
-    type: str  # "new_message" | "draft" | "approved" | "skipped" | "error"
-    payload: dict[str, Any] = {}
-
-
 # ── Consent ────────────────────────────────────────────────────────────────
 
 

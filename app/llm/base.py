@@ -13,7 +13,7 @@ class BaseLLM(ABC):
         temperature: float = 0.7,
         max_tokens: int = 1000,
         response_format: str = "text",
-        **kwargs
+        **kwargs,
     ) -> Any:
         """Генерация текста. Если stream=True — возвращает async-генератор."""
         pass

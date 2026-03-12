@@ -22,11 +22,7 @@ def _vm(request: Request) -> VectorMemory:
 
 def _to_response(contact_id: str, c: dict) -> ContactResponse:
     p = c.get("profile", {})
-    rel = (
-        p.get("relationship")
-        if isinstance(p, dict) and not p.get("parse_error")
-        else None
-    )
+    rel = p.get("relationship") if isinstance(p, dict) and not p.get("parse_error") else None
     return ContactResponse(
         contact_id=contact_id,
         name=c["name"],
@@ -55,9 +51,7 @@ async def get_contact(contact_id: str, request: Request):
 @router.patch("/contacts/{contact_id}/ai-mode", response_model=ContactResponse)
 async def set_ai_mode(contact_id: str, body: ContactAIModeRequest, request: Request):
     if body.mode not in ("auto", "never", "ask"):
-        raise HTTPException(
-            status_code=400, detail="mode must be 'auto', 'never', or 'ask'"
-        )
+        raise HTTPException(status_code=400, detail="mode must be 'auto', 'never', or 'ask'")
     memory = _memory(request)
     contacts = memory.data.get("contacts", {})
     if contact_id not in contacts:
@@ -113,9 +107,7 @@ async def analyze_contact(contact_id: str, request: Request):
     vm = _vm(request)
     msgs = vm.get_contact_messages(contact_filter=name, max_messages=500)
     if not msgs:
-        raise HTTPException(
-            status_code=422, detail=f"No indexed messages found for '{name}'"
-        )
+        raise HTTPException(status_code=422, detail=f"No indexed messages found for '{name}'")
 
     lines = []
     for m in msgs[-200:]:

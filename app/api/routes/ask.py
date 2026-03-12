@@ -12,9 +12,7 @@ async def ask(body: AskRequest, request: Request):
     vm: VectorMemory = request.app.state.vector_memory
 
     if vm.index_size() == 0:
-        raise HTTPException(
-            status_code=503, detail="RAG index is empty. Run: python scripts/index.py"
-        )
+        raise HTTPException(status_code=503, detail="RAG index is empty. Run: python scripts/index.py")
 
     try:
         params = parse_query(body.query)
@@ -31,9 +29,7 @@ async def ask(body: AskRequest, request: Request):
     if intent == "analyze" and contact:
         msgs = vm.get_contact_messages(contact, False, date_from, date_to)
         if not msgs:
-            return AskResponse(
-                answer="Сообщений не найдено.", intent=intent, contact=contact
-            )
+            return AskResponse(answer="Сообщений не найдено.", intent=intent, contact=contact)
         answer_text = vm.answer(body.query, msgs)
         sources = [
             SourceItem(
@@ -45,9 +41,7 @@ async def ask(body: AskRequest, request: Request):
             )
             for m in msgs[-5:]
         ]
-        return AskResponse(
-            answer=answer_text, intent=intent, contact=contact, sources=sources
-        )
+        return AskResponse(answer=answer_text, intent=intent, contact=contact, sources=sources)
 
     k = 12 if contact else 20
     results = vm.search(
@@ -60,9 +54,7 @@ async def ask(body: AskRequest, request: Request):
         date_to=date_to,
     )
     if not results:
-        return AskResponse(
-            answer="Ничего не найдено.", intent=intent, contact=contact or None
-        )
+        return AskResponse(answer="Ничего не найдено.", intent=intent, contact=contact or None)
 
     answer_text = answer_search(body.query, results)
     sources = [
@@ -75,6 +67,4 @@ async def ask(body: AskRequest, request: Request):
         )
         for r in results[:5]
     ]
-    return AskResponse(
-        answer=answer_text, intent=intent, contact=contact or None, sources=sources
-    )
+    return AskResponse(answer=answer_text, intent=intent, contact=contact or None, sources=sources)

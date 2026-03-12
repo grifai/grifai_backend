@@ -29,9 +29,7 @@ class RedisEventBus:
             if "BUSYGROUP" not in str(e):
                 raise
         while True:
-            resp = await self.redis.xreadgroup(
-                group, consumer, streams={stream: ">"}, count=10, block=1000
-            )
+            resp = await self.redis.xreadgroup(group, consumer, streams={stream: ">"}, count=10, block=1000)
             for s, messages in resp:
                 for msg_id, msg in messages:
                     await handler(msg)

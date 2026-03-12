@@ -112,11 +112,7 @@ class VectorMemory:
         """Return exact contact names that fuzzy-match contact_filter."""
         if self._contact_names_cache is None:
             self._contact_names_cache = self._fetch_all_contact_names()
-        return [
-            cn
-            for cn in self._contact_names_cache
-            if _contact_matches(cn, contact_filter)
-        ]
+        return [cn for cn in self._contact_names_cache if _contact_matches(cn, contact_filter)]
 
     def _invalidate_cache(self) -> None:
         self._contact_names_cache = None
@@ -137,9 +133,7 @@ class VectorMemory:
             exact_names = self._resolve_contacts(contact_filter)
             if not exact_names:
                 return "NO_MATCH"
-            conditions.append(
-                FieldCondition(key="contact_name", match=MatchAny(any=exact_names))
-            )
+            conditions.append(FieldCondition(key="contact_name", match=MatchAny(any=exact_names)))
 
         if only_mine:
             conditions.append(FieldCondition(key="mine", match=MatchValue(value=True)))
@@ -447,9 +441,7 @@ def count_and_find(
     date_from: str | None = None,
     date_to: str | None = None,
 ) -> tuple[int, list[dict]]:
-    return _get().count_and_find(
-        substring, contact_filter, only_mine, date_from, date_to
-    )
+    return _get().count_and_find(substring, contact_filter, only_mine, date_from, date_to)
 
 
 def get_contact_messages(
@@ -459,9 +451,7 @@ def get_contact_messages(
     date_to: str | None = None,
     max_messages: int = 2000,
 ) -> list[dict]:
-    return _get().get_contact_messages(
-        contact_filter, only_mine, date_from, date_to, max_messages
-    )
+    return _get().get_contact_messages(contact_filter, only_mine, date_from, date_to, max_messages)
 
 
 def list_matching_contacts(contact_filter: str) -> list[str]:

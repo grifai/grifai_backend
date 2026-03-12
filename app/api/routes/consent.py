@@ -32,15 +32,11 @@ def grant_consent(user_id: int, data: UserConsentCreate, db: Session = Depends(g
 
 # ── DELETE /user/{user_id}/consent ─────────────────────────────────────────────
 @router.delete("/user/{user_id}/consent", response_model=UserConsentInDB)
-def revoke_consent(
-    user_id: int, data: UserConsentRevoke, db: Session = Depends(get_db)
-):
+def revoke_consent(user_id: int, data: UserConsentRevoke, db: Session = Depends(get_db)):
     """Отозвать согласие — данные этого типа будут помечены к удалению."""
     consent = revoke_user_consent(db, user_id, data.consent_type)
     if not consent:
-        raise HTTPException(
-            status_code=404, detail="Consent not found or already revoked"
-        )
+        raise HTTPException(status_code=404, detail="Consent not found or already revoked")
     return consent
 
 

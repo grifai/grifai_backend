@@ -62,9 +62,7 @@ class GhostWriter:
             examples_lines.append(f'Им: "{inc}" → Я: "{rep}"')
 
         # Also pull last 50 of my own messages for this contact from RAG
-        rag_msgs = self.vm.get_contact_messages(
-            contact_filter=contact_name, only_mine=True, max_messages=50
-        )
+        rag_msgs = self.vm.get_contact_messages(contact_filter=contact_name, only_mine=True, max_messages=50)
         for m in rag_msgs[-30:]:  # keep latest 30 to avoid huge prompts
             examples_lines.append(f"Я: {m.get('text', '')[:100]}")
 
@@ -131,19 +129,12 @@ class GhostWriter:
 
         # b) Few-shot examples (up to 5 approved pairs)
         examples = self.store.get_contact_examples(contact_id, n=5)
-        examples_block = (
-            _format_examples(examples) if examples else "(нет примеров пока)"
-        )
+        examples_block = _format_examples(examples) if examples else "(нет примеров пока)"
 
         # c) RAG: search relevant history
         query = " ".join(incoming_messages)
-        rag_results = self.vm.search(
-            query, k=6, min_score=0.35, contact_filter=contact_name
-        )
-        rag_context = (
-            format_rag_context(rag_results, max_chars=600)
-            or "(нет релевантной истории)"
-        )
+        rag_results = self.vm.search(query, k=6, min_score=0.35, contact_filter=contact_name)
+        rag_context = format_rag_context(rag_results, max_chars=600) or "(нет релевантной истории)"
 
         # d) Build prompt
         system = REPLY_SYSTEM_PROMPT.format(
@@ -167,9 +158,7 @@ class GhostWriter:
 
     # ── Learning from approvals ────────────────────────────────────────────────
 
-    def learn_from_approval(
-        self, contact_id: str, incoming: str, approved_reply: str
-    ) -> None:
+    def learn_from_approval(self, contact_id: str, incoming: str, approved_reply: str) -> None:
         self.store.add_contact_example(contact_id, incoming, approved_reply)
 
         examples = self.store.get_contact_examples(contact_id, n=20)

@@ -37,12 +37,8 @@ class ClaudeLLM(BaseLLM):
                 data = resp.json()
                 latency = time.monotonic() - start
                 # Логирование latency и token count
-                print(
-                    f"[ClaudeLLM] latency={latency:.2f}s tokens={data.get('usage', {}).get('output_tokens', 0)}"
-                )
-                return (
-                    data["content"] if not stream else data
-                )  # stream поддержка — доработать под SSE
+                print(f"[ClaudeLLM] latency={latency:.2f}s tokens={data.get('usage', {}).get('output_tokens', 0)}")
+                return data["content"] if not stream else data  # stream поддержка — доработать под SSE
             except httpx.HTTPStatusError as e:
                 if e.response.status_code == 429:
                     raise RuntimeError("rate_limit")

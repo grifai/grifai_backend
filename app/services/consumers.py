@@ -61,9 +61,7 @@ async def ghost_writer_consumer(
         # Build relationship profile on first encounter
         if not memory.get_contact(contact_id):
             print(f"  [gw] Building profile for {contact_name}...")
-            full_msgs, my_c, their_c = await fetch_messages(
-                client, chat_id, scan_messages
-            )
+            full_msgs, my_c, their_c = await fetch_messages(client, chat_id, scan_messages)
             if my_c >= 3 and their_c >= 3:
                 try:
                     profile = ai.analyze_contact(format_dialog(full_msgs))
@@ -72,9 +70,7 @@ async def ghost_writer_consumer(
                     print(f"  [gw] Profile error: {exc}")
 
         draft = ghost_writer.generate_reply(contact_id, texts, chat_context)
-        print(
-            f"  [gw] Draft for {contact_name} (conf={draft.confidence:.0%}): {draft.text[:60]!r}"
-        )
+        print(f"  [gw] Draft for {contact_name} (conf={draft.confidence:.0%}): {draft.text[:60]!r}")
 
         await bus.publish(
             STREAMS["DRAFTS"],
@@ -91,9 +87,7 @@ async def ghost_writer_consumer(
             },
         )
 
-    await bus.subscribe(
-        STREAMS["INCOMING"], "ghost_writer_group", "gw1", handle, batch_size=5
-    )
+    await bus.subscribe(STREAMS["INCOMING"], "ghost_writer_group", "gw1", handle, batch_size=5)
 
 
 # ── Consumer 2: Approval UI ────────────────────────────────────────────────────
@@ -125,14 +119,10 @@ async def approval_ui_consumer(
         def run_approval() -> tuple[str, str | None, str]:
             current = initial_draft
             while True:
-                action, final = ask_approval(
-                    contact_name, contact_id, texts, current, memory
-                )
+                action, final = ask_approval(contact_name, contact_id, texts, current, memory)
                 if action == "redo":
                     print("Regenerating...")
-                    current = ghost_writer.generate_reply(
-                        contact_id, texts, chat_context
-                    ).text
+                    current = ghost_writer.generate_reply(contact_id, texts, chat_context).text
                     continue
                 return action, final, current
 
@@ -141,9 +131,7 @@ async def approval_ui_consumer(
         if action in ("approved", "revised") and final:
             await client.send_message(chat_id, final)
             print(f"Sent: {final!r}")
-            memory.add_example(
-                contact_name, " | ".join(texts), used_draft, action, final
-            )
+            memory.add_example(contact_name, " | ".join(texts), used_draft, action, final)
             await bus.publish(
                 STREAMS["APPROVED"],
                 "reply_sent",
@@ -159,9 +147,7 @@ async def approval_ui_consumer(
             memory.add_example(contact_name, " | ".join(texts), used_draft, "skipped")
 
     # batch_size=1: process approvals one at a time (terminal is single-user)
-    await bus.subscribe(
-        STREAMS["DRAFTS"], "approval_ui_group", "ui1", handle, batch_size=1
-    )
+    await bus.subscribe(STREAMS["DRAFTS"], "approval_ui_group", "ui1", handle, batch_size=1)
 
 
 # ── Consumer 3: Learner ────────────────────────────────────────────────────────
@@ -203,9 +189,7 @@ async def profiler_consumer(
 
         print(f"  [profiler] Rebuilding profile for {contact_name} (trigger={trigger})")
         try:
-            msgs, my_c, their_c = await fetch_messages(
-                client, int(contact_id), scan_messages
-            )
+            msgs, my_c, their_c = await fetch_messages(client, int(contact_id), scan_messages)
             if my_c >= 3 and their_c >= 3:
                 profile = ai.analyze_contact(format_dialog(msgs))
                 memory.set_contact(contact_id, contact_name, profile)
@@ -215,6 +199,4 @@ async def profiler_consumer(
         except Exception as exc:
             print(f"  [profiler] Error for {contact_name}: {exc}")
 
-    await bus.subscribe(
-        STREAMS["PROFILE_UPDATES"], "profiler_group", "profiler1", handle
-    )
+    await bus.subscribe(STREAMS["PROFILE_UPDATES"], "profiler_group", "profiler1", handle)
