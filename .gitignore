@@ -1,5 +1,7 @@
 __pycache__/
+**/__pycache__/
 *.pyc
+*.pyo
 
 # Local env file (do not commit)
 .env
