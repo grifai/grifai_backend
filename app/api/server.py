@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import ask, consent, contacts, health, summary
+from app.api.routes import ask, auth, consent, contacts, health, summary
 from app.config import settings
 
 # ── WebSocket connection manager ───────────────────────────────────────────────
@@ -102,6 +102,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth.router, prefix="/api/v1", tags=["auth"])
 app.include_router(ask.router, prefix="/api/v1", tags=["search"])
 app.include_router(contacts.router, prefix="/api/v1", tags=["contacts"])
 app.include_router(summary.router, prefix="/api/v1", tags=["digest"])

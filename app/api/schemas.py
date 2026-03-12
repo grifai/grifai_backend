@@ -1,7 +1,36 @@
 from datetime import datetime
 from typing import Any, Literal, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
+
+# ── Auth ──────────────────────────────────────────────────────────────────────
+
+
+class RegisterRequest(BaseModel):
+    email: EmailStr
+    password: str
+    name: Optional[str] = None
+
+
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+
+
+class UserResponse(BaseModel):
+    id: int
+    email: str
+    name: Optional[str]
+    is_active: bool
+
+    class Config:
+        from_attributes = True
+
 
 # ── Ask ───────────────────────────────────────────────────────────────────────
 

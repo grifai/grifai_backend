@@ -23,6 +23,11 @@ qdrant-client
 sentence-transformers
 httpx
 
+# ── Auth ─────────────────────────────────────────────────────────────────────
+python-jose[cryptography]>=3.3
+passlib[bcrypt]>=1.7
+email-validator>=2.1        # pydantic EmailStr support
+
 # ── Config / validation ───────────────────────────────────────────────────────
 pydantic>=2.7
 pydantic-settings>=2.3
