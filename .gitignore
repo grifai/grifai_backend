@@ -1,5 +1,17 @@
 __pycache__/
+**/__pycache__/
 *.pyc
+*.pyo
 
 # Local env file (do not commit)
 .env
+
+# Telegram / WhatsApp session files
+*.session
+*.session-journal
+whatsapp_session/
+
+# Local data files
+jarvis_memory.json
+jarvis_rag.pkl
+jarvis_cache/
