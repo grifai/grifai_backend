@@ -7,6 +7,7 @@ import rag
 from memory import JarvisMemory
 from telegram_bot import JarvisBot
 from sources.whatsapp import WhatsAppSource
+from sources.vk import VKSource
 
 
 async def on_whatsapp_message(platform, chat_id, sender_name, sender_id, text):
@@ -102,6 +103,37 @@ async def run():
     print("  Listening for messages. Ctrl+C to stop.")
     _memory.print_stats()
     print("=" * 55 + "\n")
+
+    # ── VK ────────────────────────────────────────────────────────────────────
+    if config.VK_TOKEN:
+        print("\n" + "!" * 55)
+        print("  ВНИМАНИЕ: VK — ТЕСТОВАЯ ФУНКЦИЯ")
+        print("!" * 55)
+        print("  Использование автоматических ответов от имени")
+        print("  пользователя нарушает правила VK и может привести к:")
+        print("    - временной или постоянной блокировке аккаунта")
+        print("    - ограничению доступа к сообщениям")
+        print("    - другим последствиям со стороны платформы")
+        print()
+        print("  Нажимая Enter/«продолжить», вы подтверждаете, что")
+        print("  осознаёте риски и берёте ответственность на себя.")
+        print("!" * 55)
+        confirm = input("\n  Продолжить? (да / нет): ").strip().lower()
+        if confirm not in ("да", "д", "yes", "y"):
+            print("VK: отменено.")
+        else:
+            vk = VKSource(
+                on_message=on_whatsapp_message,
+                memory=_memory,
+                model=config.MODEL,
+                token=config.VK_TOKEN,
+                scan_contacts=config.SCAN_CONTACTS,
+                scan_messages=config.SCAN_MESSAGES,
+            )
+            await vk.start()
+            await vk.prescan()
+    else:
+        print("VK: skipped (VK_TOKEN not set)")
 
     await client.run_until_disconnected()
 
