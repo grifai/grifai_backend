@@ -6,12 +6,59 @@ import ai
 import rag
 from memory import JarvisMemory
 from telegram_bot import JarvisBot
+from sources.max import MaxSource
+
+_memory: JarvisMemory = None
+
+
+async def on_max_message(platform, chat_id, sender_name, sender_id, text):
+    """Обрабатывает входящее Max-сообщение и возвращает ответ или None."""
+    print(f"\n{'=' * 55}")
+    print(f"[Max] From {sender_name}: {text}")
+
+    rag_results = rag.search(text, k=5, min_score=0.4)
+    rag_context = rag.format_rag_context(rag_results)
+
+    contact_id = f"max_{sender_id}"
+
+    draft = ai.generate_reply(
+        sender=sender_name,
+        contact_id=contact_id,
+        incoming_batch=[text],
+        chat_context="",
+        memory=_memory,
+        model=config.MODEL,
+        rag_context=rag_context,
+    )
+
+    if draft == "[SKIP]":
+        print("Jarvis: no reply needed")
+        return None
+
+    print(f"Jarvis draft: {draft!r}")
+    print("-" * 55)
+    print("  1 Send   2 Edit   3 Skip")
+    ch = input("-> ").strip()
+
+    if ch == "1":
+        _memory.add_example(sender_name, text, draft, "approved", draft)
+        return draft
+    elif ch == "2":
+        final = input("Your text: ").strip()
+        _memory.add_example(sender_name, text, draft, "revised", final)
+        return final
+    else:
+        _memory.add_example(sender_name, text, draft, "skipped")
+        return None
 
 
 async def run():
+    global _memory
+
     ai.init_openai(config.OPENAI_KEY)
     rag.init(config.OPENAI_KEY)
     memory = JarvisMemory(config.MEMORY_FILE)
+    _memory = memory
 
     client = TelegramClient(config.SESSION_FILE, config.API_ID, config.API_HASH)
     await client.start()
@@ -39,6 +86,21 @@ async def run():
     await bot.prescan()
 
     bot.register_handlers()
+
+    # ── Max ───────────────────────────────────────────────────────────────────
+    if config.MAX_PHONE:
+        max_source = MaxSource(
+            phone=config.MAX_PHONE,
+            on_message=on_max_message,
+            memory=memory,
+            model=config.MODEL,
+            scan_contacts=config.SCAN_CONTACTS,
+            scan_messages=config.SCAN_MESSAGES,
+        )
+        await max_source.start()
+        await max_source.prescan()
+    else:
+        print("Max: disabled (set MAX_PHONE in .env to enable)")
 
     print("\n" + "=" * 55)
     print("  Listening for messages. Ctrl+C to stop.")

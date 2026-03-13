@@ -3,3 +3,7 @@ __pycache__/
 
 # Local env file (do not commit)
 .env
+
+# WhatsApp bridge
+whatsapp_bridge/node_modules/
+whatsapp_bridge/whatsapp_session/

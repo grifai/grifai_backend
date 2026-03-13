@@ -33,6 +33,9 @@ MEMORY_FILE  = Path(os.getenv("MEMORY_FILE", "jarvis_memory.json"))
 CACHE_DIR    = Path("jarvis_cache")
 CACHE_DIR.mkdir(exist_ok=True)
 
+# Max messenger (optional — leave empty to disable)
+MAX_PHONE = os.getenv("MAX_PHONE", "")
+
 # Behaviour
 BATCH_WAIT_SEC  = int(os.getenv("BATCH_WAIT_SEC",  "5"))
 SCAN_CONTACTS   = int(os.getenv("SCAN_CONTACTS",   "50"))
