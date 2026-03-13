@@ -17,7 +17,6 @@ def _format_dialog(msgs: list[dict]) -> str:
         lines.append(f"[{who}]: {m['text'][:300]}")
     return "\n".join(lines)
 
-
 class WhatsAppSource:
     def __init__(self, on_message, memory, model, scan_contacts=50, scan_messages=150):
         self._on_message = on_message
@@ -47,14 +46,12 @@ class WhatsAppSource:
             return
 
         scanned = 0
+        all_my_msgs: list[str] = []
+
         for chat in chats[:self.scan_contacts]:
             chat_id = chat["id"]
             name = chat["name"]
             contact_id = f"wa_{chat_id}"
-
-            if self.memory.get_contact(contact_id):
-                print(f"  skip {name} — profile up to date")
-                continue
 
             async with httpx.AsyncClient(timeout=15) as client:
                 try:
@@ -66,6 +63,12 @@ class WhatsAppSource:
                 except Exception as e:
                     print(f"  skip {name} — fetch error: {e}")
                     continue
+
+            all_my_msgs.extend(m["text"] for m in msgs if m["mine"])
+
+            if self.memory.get_contact(contact_id):
+                print(f"  skip {name} — profile up to date")
+                continue
 
             my_count = sum(1 for m in msgs if m["mine"])
             their_count = sum(1 for m in msgs if not m["mine"])
@@ -86,6 +89,15 @@ class WhatsAppSource:
 
             scanned += 1
             await asyncio.sleep(0.5)
+
+        if all_my_msgs and not self.memory.get_my_profile():
+            print("WhatsApp: building general style profile...", end=" ", flush=True)
+            try:
+                style = ai.analyze_my_style(all_my_msgs, self.model)
+                self.memory.set_my_profile(style)
+                print("ok")
+            except Exception as e:
+                print(f"error: {e}")
 
         print(f"WhatsApp scan complete: {scanned} analyzed")
 

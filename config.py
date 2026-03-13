@@ -33,6 +33,9 @@ MEMORY_FILE  = Path(os.getenv("MEMORY_FILE", "jarvis_memory.json"))
 CACHE_DIR    = Path("jarvis_cache")
 CACHE_DIR.mkdir(exist_ok=True)
 
+# VK (optional)
+VK_TOKEN = os.getenv("VK_TOKEN", "").strip()
+
 # Behaviour
 BATCH_WAIT_SEC  = int(os.getenv("BATCH_WAIT_SEC",  "5"))
 SCAN_CONTACTS   = int(os.getenv("SCAN_CONTACTS",   "50"))
