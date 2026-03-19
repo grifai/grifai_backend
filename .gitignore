@@ -10,8 +10,12 @@ __pycache__/
 *.session
 *.session-journal
 whatsapp_session/
+whatsapp_bridge/whatsapp_session/
 
 # Local data files
 jarvis_memory.json
 jarvis_rag.pkl
 jarvis_cache/
+
+# Node dependencies
+node_modules/

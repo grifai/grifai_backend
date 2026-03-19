@@ -1,10 +1,12 @@
 import asyncio
-from telethon import TelegramClient
+import signal
 
-import config
 import ai
+import config
 import rag
+from compose import compose_flow
 from memory import JarvisMemory
+from telethon import TelegramClient
 from telegram_bot import JarvisBot
 from sources.whatsapp import WhatsAppSource
 from sources.vk import VKSource
@@ -52,6 +54,22 @@ async def on_whatsapp_message(platform, chat_id, sender_name, sender_id, text):
 
 
 _memory: JarvisMemory = None
+
+
+async def _ask(prompt: str) -> str:
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, lambda: input(prompt).strip())
+
+
+async def _listen_mode(client: TelegramClient):
+    """Слушает новые сообщения до Ctrl+C."""
+    stop = asyncio.Event()
+    loop = asyncio.get_event_loop()
+    loop.add_signal_handler(signal.SIGINT, stop.set)
+    print("\nСлушаю новые сообщения... Ctrl+C для возврата в меню\n")
+    await stop.wait()
+    loop.remove_signal_handler(signal.SIGINT)
+    print("\nВозврат в меню...")
 
 
 async def run():

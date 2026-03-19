@@ -84,6 +84,17 @@ KEY RULES:
 """
 
 
+_COMPOSE_SYSTEM = """You are Jarvis, an AI assistant. You are COMPOSING a new message ON BEHALF of the user (not replying — initiating).
+
+KEY RULES:
+1. Imitate the user's style EXACTLY — phrases, length, punctuation, tone
+2. Account for the RELATIONSHIP with the contact
+3. Express the given INTENT naturally, as the user would say it
+4. Keep it natural — don't be too formal or too wordy
+5. Write in the language appropriate for this contact
+6. Return ONLY the message text, nothing else
+"""
+
 # ── Public API ─────────────────────────────────────────────────────────────────
 
 def analyze_contact(dialog_text: str, model: str) -> dict:
@@ -112,8 +123,13 @@ def generate_reply(
     memory: JarvisMemory,
     model: str,
     rag_context: str = "",
+    refinement: str = "",
 ) -> str:
     system = _REPLY_SYSTEM
+
+    personal_prompt = memory.get_personal_prompt()
+    if personal_prompt:
+        system += f"\n\n### User's personal instructions:\n{personal_prompt}"
 
     my_profile = memory.get_my_profile()
     if my_profile:
@@ -163,4 +179,49 @@ def generate_reply(
         user_msg += f"\nRecent conversation:\n{chat_context}\n---\n"
     user_msg += f"\nIncoming:\n{incoming_text}\n\nMy reply:"
 
+    if refinement:
+        user_msg += f"\n\n[Refinement instruction: {refinement}]"
+
     return _call(system, user_msg, model, 400)
+
+
+def compose_message(
+    sender: str,
+    contact_id: str,
+    intent: str,
+    memory: JarvisMemory,
+    model: str,
+    refinement: str = "",
+) -> str:
+    """Compose a new outgoing message expressing the given intent in user's style."""
+    system = _COMPOSE_SYSTEM
+
+    personal_prompt = memory.get_personal_prompt()
+    if personal_prompt:
+        system += f"\n\n### User's personal instructions:\n{personal_prompt}"
+
+    my_profile = memory.get_my_profile()
+    if my_profile:
+        system += f"\n\n### My general messaging style:\n{my_profile}"
+
+    contact = memory.get_contact(contact_id)
+    if contact and contact.get("profile"):
+        p = contact["profile"]
+        if isinstance(p, dict) and not p.get("parse_error"):
+            system += f"\n\n### Relationship with {sender}:"
+            system += f"\nRelationship: {p.get('relationship', '?')}"
+            system += f"\nVibe: {p.get('vibe', '?')}"
+            ms = p.get("my_style", {})
+            if ms:
+                system += f"\nMy style with them: tone={ms.get('tone','?')}, length={ms.get('msg_length','?')}"
+                if ms.get("phrases"):
+                    system += f", phrases: {', '.join(ms['phrases'][:5])}"
+                if ms.get("quirks"):
+                    system += f", quirks: {ms['quirks']}"
+            if p.get("important_context"):
+                system += f"\nContext: {p['important_context']}"
+
+    user_msg = f"Contact: {sender}\nIntent (what I want to say): {intent}\n\nWrite the message:"
+    if refinement:
+        user_msg += f"\n\n[Refinement instruction: {refinement}]"
+    return _call(system, user_msg, model, 300)

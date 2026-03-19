@@ -124,6 +124,16 @@ class JarvisMemory:
             )
         return "\n".join(lines)
 
+    # ── Personal prompt ───────────────────────────────────────────────────────
+
+    def set_personal_prompt(self, prompt: str):
+        """Сохраняет личный промпт — инструкции как AI должен отвечать."""
+        self.data["personal_prompt"] = prompt
+        self.save()
+
+    def get_personal_prompt(self) -> str:
+        return self.data.get("personal_prompt", "")
+
     # ── Stats ─────────────────────────────────────────────────────────────────
 
     def print_stats(self):
