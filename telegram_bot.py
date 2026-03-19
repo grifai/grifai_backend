@@ -1,5 +1,7 @@
 import asyncio
 import json
+import os
+import tempfile
 from datetime import datetime
 
 from telethon import TelegramClient, events
@@ -378,8 +380,32 @@ class JarvisBot:
     def register_handlers(self):
         @self.client.on(events.NewMessage(incoming=True))
         async def on_message(event):
-            if not (event.is_private and event.raw_text):
+            if not event.is_private:
                 return
+
+            text = event.raw_text
+
+            # Голосовые сообщения → транскрипция через Whisper
+            if not text and (event.message.voice or event.message.audio):
+                try:
+                    suffix = ".ogg" if event.message.voice else ".mp3"
+                    with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as f:
+                        tmp_path = f.name
+                    await event.message.download_media(file=tmp_path)
+                    loop = asyncio.get_event_loop()
+                    text = await loop.run_in_executor(
+                        None, lambda: ai.transcribe_voice(tmp_path)
+                    )
+                    os.unlink(tmp_path)
+                    if text:
+                        print(f"  [Voice→Text] {text[:120]}")
+                except Exception as e:
+                    print(f"  Voice transcription error: {e}")
+                    return
+
+            if not text:
+                return
+
             if self.memory.get_contact_ai_mode(str(event.chat_id)) == "never":
                 return
             sender = await event.get_sender()
@@ -388,5 +414,5 @@ class JarvisBot:
                 or str(sender.id)
             )
             await self._buffer_message(
-                event.chat_id, name, str(event.chat_id), event.raw_text, event
+                event.chat_id, name, str(event.chat_id), text, event
             )

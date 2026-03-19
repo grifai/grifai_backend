@@ -97,6 +97,23 @@ KEY RULES:
 
 # ── Public API ─────────────────────────────────────────────────────────────────
 
+def transcribe_voice(file_path: str) -> str:
+    """Транскрибирует аудиофайл через OpenAI Whisper."""
+    with open(file_path, "rb") as f:
+        result = _oai().audio.transcriptions.create(model="whisper-1", file=f)
+    return result.text
+
+
+def summarize_call(transcript: str, model: str) -> str:
+    """Суммирует транскрипт звонка."""
+    system = (
+        "Ты помощник, который создаёт краткие сводки звонков. "
+        "Выдели: ключевые темы, принятые решения, задачи. "
+        "Отвечай на том же языке, что и транскрипт."
+    )
+    return _call(system, f"Транскрипт:\n\n{transcript}", model, 600)
+
+
 def analyze_contact(dialog_text: str, model: str) -> dict:
     """Deep contact analysis via LLM -> JSON profile."""
     raw = _call(_ANALYSIS_PROMPT, f"Conversation:\n\n{dialog_text}", model, 800)
