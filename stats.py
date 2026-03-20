@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Jarvis — dashboard статистики.
+Grif — dashboard статистики.
 
 Использование:
   python stats.py            — всё

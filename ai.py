@@ -71,7 +71,7 @@ Reply briefly — this will be the base profile:
 - Quirks (slang, profanity, language switching)
 - How I open/close conversations"""
 
-_REPLY_SYSTEM = """You are Jarvis, an AI assistant. You are writing a Telegram reply ON BEHALF of the user.
+_REPLY_SYSTEM = """You are Grif, an AI assistant. You are writing a Telegram reply ON BEHALF of the user.
 
 KEY RULES:
 1. Imitate the user's style EXACTLY — phrases, length, punctuation, tone
@@ -84,7 +84,7 @@ KEY RULES:
 """
 
 
-_COMPOSE_SYSTEM = """You are Jarvis, an AI assistant. You are COMPOSING a new message ON BEHALF of the user (not replying — initiating).
+_COMPOSE_SYSTEM = """You are Grif, an AI assistant. You are COMPOSING a new message ON BEHALF of the user (not replying — initiating).
 
 KEY RULES:
 1. Imitate the user's style EXACTLY — phrases, length, punctuation, tone

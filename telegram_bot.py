@@ -62,10 +62,10 @@ async def ask_approval(
     print("-" * 55)
 
     if draft == "[SKIP]":
-        print("Jarvis: no reply needed")
+        print("Grif: no reply needed")
         return "skipped", None
 
-    print(f"Jarvis: {draft!r}")
+    print(f"Grif: {draft!r}")
     print("-" * 55)
 
     while True:

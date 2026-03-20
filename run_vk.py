@@ -84,7 +84,7 @@ async def on_vk_message(platform, chat_id, sender_name, sender_id, text):
     draft = await _generate(sender_name, sender_id, text)
 
     if draft == "[SKIP]":
-        print("  Jarvis: ответ не нужен")
+        print("  Grif: ответ не нужен")
         return None
 
     return await _approval_loop(sender_name, sender_id, text, draft)
@@ -140,7 +140,7 @@ async def _review_unread():
             print("  Генерирую черновик...")
             draft = await _generate(chat["name"], str(chat["peer_id"]), incoming_text)
             if draft == "[SKIP]":
-                print("  Jarvis: ответ не нужен")
+                print("  Grif: ответ не нужен")
             else:
                 reply = await _approval_loop(
                     chat["name"], str(chat["peer_id"]), incoming_text, draft

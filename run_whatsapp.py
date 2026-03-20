@@ -42,7 +42,7 @@ async def on_whatsapp_message(platform, chat_id, sender_name, sender_id, text):
     )
 
     if draft == "[SKIP]":
-        print("Jarvis: no reply needed")
+        print("Grif: no reply needed")
         return None
 
     print(f"\n{'=' * 55}")
@@ -50,7 +50,7 @@ async def on_whatsapp_message(platform, chat_id, sender_name, sender_id, text):
     print("-" * 55)
 
     while True:
-        print(f"Jarvis: {draft!r}")
+        print(f"Grif: {draft!r}")
         print("  1 Send   2 Edit   3 Refine   4 Regen   5 Skip")
         ch = await _ask("-> ")
 

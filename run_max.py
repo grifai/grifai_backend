@@ -43,10 +43,10 @@ async def on_max_message(platform, chat_id, sender_name, sender_id, text):
     )
 
     if draft == "[SKIP]":
-        print("Jarvis: no reply needed")
+        print("Grif: no reply needed")
         return None
 
-    print(f"Jarvis draft: {draft!r}")
+    print(f"Grif draft: {draft!r}")
     print("-" * 55)
     print("  1 Send   2 Edit   3 Skip")
     ch = await _ask("-> ")

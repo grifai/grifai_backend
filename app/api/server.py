@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import ask, auth, consent, contacts, health, summary
+from app.api.routes import ask, auth, consent, contacts, health, summary, voice
 from app.config import settings
 
 # ── WebSocket connection manager ───────────────────────────────────────────────
@@ -89,9 +89,9 @@ async def lifespan(app: FastAPI):
 # ── App ────────────────────────────────────────────────────────────────────────
 
 app = FastAPI(
-    title="Jarvis API",
+    title="Grif API",
     version="0.2.0",
-    description="REST + WebSocket API for the Jarvis Telegram assistant",
+    description="REST + WebSocket API for the Grif Telegram assistant",
     lifespan=lifespan,
 )
 
@@ -108,9 +108,15 @@ app.include_router(contacts.router, prefix="/api/v1", tags=["contacts"])
 app.include_router(summary.router, prefix="/api/v1", tags=["digest"])
 app.include_router(health.router, prefix="/api/v1", tags=["system"])
 app.include_router(consent.router, prefix="/api/v1", tags=["consent"])
+app.include_router(voice.router, prefix="/api/v1", tags=["voice"])
 
 
 # ── WebSocket ──────────────────────────────────────────────────────────────────
+
+
+@app.websocket("/ws/voice")
+async def voice_websocket(websocket: WebSocket):
+    await voice.voice_stream(websocket)
 
 
 @app.websocket("/ws")
